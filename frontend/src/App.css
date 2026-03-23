@@ -1,0 +1,141 @@
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: #f5f7f6;
+}
+
+/* CONTAINER */
+.container {
+  width: 90%;
+  margin: auto;
+  max-width: 1200px;
+  padding: 40px 0;
+}
+
+/* HEADINGS */
+h1, h2 {
+  text-align: center;
+}
+
+/* BUTTONS */
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  margin: 5px;
+  display: inline-block;
+  transition: 0.3s;
+}
+
+.primary {
+  background: #065f46;
+  color: white;
+}
+
+.secondary {
+  background: #facc15;
+  color: black;
+}
+
+/* BUTTON HOVER */
+.btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* CARDS */
+.cards {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  flex: 1;
+  border-radius: 12px;
+  min-width: 250px;
+  max-width: 300px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+/* CARD HOVER */
+.card:hover {
+  transform: translateY(-8px);
+}
+
+/* LINKS */
+a {
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+a:hover {
+  color: #facc15;
+}
+
+/* LAST BUTTON (Admission) */
+a:last-child:hover {
+  background: #fde047;
+}
+
+/* ========================= */
+/* 🔥 NAVBAR RESPONSIVE FIX */
+/* ========================= */
+
+@media (max-width: 768px) {
+
+  /* Hide normal menu */
+  nav div:nth-child(3) {
+    display: none;
+  }
+
+  /* Show hamburger */
+  nav div:nth-child(2) {
+    display: block !important;
+  }
+
+  /* Reduce logo text */
+  nav h2 {
+    font-size: 14px;
+  }
+
+  /* Tagline small */
+  nav p {
+    font-size: 10px;
+  }
+
+}
+
+/* ========================= */
+/* 📱 MOBILE IMPROVEMENTS */
+/* ========================= */
+
+@media (max-width: 500px) {
+
+  .container {
+    width: 95%;
+    padding: 20px 0;
+  }
+
+  .cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 90%;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+
+}
