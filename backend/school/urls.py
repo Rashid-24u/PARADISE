@@ -11,5 +11,6 @@ router.register('notices', NoticeViewSet)
 router.register('gallery', GalleryViewSet)
 
 urlpatterns = [
+    path('login/', admin_login),  # 🔥 ADD THIS
     path('', include(router.urls)),
 ]

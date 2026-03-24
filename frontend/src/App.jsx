@@ -12,6 +12,15 @@ import Gallery from "./pages/Gallery";
 import Notice from "./pages/Notice";
 import Contact from "./pages/Contact";
 import Admission from "./pages/Admission";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+
+
+import Students from "./pages/admin/Students";
+import Fees from "./pages/admin/Fees";
+import Notices from "./pages/admin/Notices";
+import GalleryAdmin from "./pages/admin/GalleryAdmin";
+import TeachersAdmin from "./pages/admin/TeachersAdmin";
 
 function App() {
   return (
@@ -27,6 +36,16 @@ function App() {
         <Route path="/notice" element={<Notice />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/admission" element={<Admission />} />
+
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
+        <Route path="/admin/students" element={<Students />} />
+        <Route path="/admin/fees" element={<Fees />} />
+        <Route path="/admin/notices" element={<Notices />} />
+        <Route path="/admin/gallery" element={<GalleryAdmin />} />
+        <Route path="/admin/teachers" element={<TeachersAdmin />} />
+        
       </Routes>
 
       <Footer />

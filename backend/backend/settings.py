@@ -40,12 +40,17 @@ INSTALLED_APPS = [
 
     'school',  # add this
     'rest_framework',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
+
+    "corsheaders.middleware.CorsMiddleware",  # 🔥 MUST BE TOP
+    "django.middleware.common.CommonMiddleware",
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -127,3 +132,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+
+# 🔥 SIMPLE FIX (DEV)
+CORS_ALLOW_ALL_ORIGINS = True
+
+# (optional but safe)
+CORS_ALLOW_CREDENTIALS = True

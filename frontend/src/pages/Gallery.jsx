@@ -1,83 +1,79 @@
 import { useEffect, useState } from "react";
 
-import img1 from "../assets/bg1.jpeg";
-import img2 from "../assets/abacusbg.jpeg";
-import img3 from "../assets/abacusbg1.jpeg";
-import img4 from "../assets/gallery2.jpeg";
-import img5 from "../assets/gallery1.jpeg";
-import img6 from "../assets/gallery4.jpeg";
-
 function Gallery() {
-  const [apiImages, setApiImages] = useState([]);
+  const [images, setImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
 
+  // 🔥 FETCH FROM BACKEND
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/gallery/")
       .then(res => res.json())
-      .then(data => setApiImages(data))
+      .then(data => setImages(data))
       .catch(err => console.log(err));
   }, []);
-
-  const allImages = [
-    ...staticImages,
-    ...apiImages.map(item => `http://127.0.0.1:8000${item.image}`)
-  ];
 
   return (
     <div>
 
-      {/* HEADER */}
+      {/* HERO */}
       <div style={styles.header}>
         <h1 style={styles.title}>Gallery</h1>
-        <p style={styles.subtitle}>Moments from Our School</p>
+        <p style={styles.subtitle}>
+          Capturing Beautiful Moments of Our School
+        </p>
       </div>
 
-      {/* IMAGES */}
+      {/* GRID */}
       <div style={styles.container}>
-        {allImages.map((img, index) => (
-          <div key={index} style={styles.card}>
+        {images.map((img, index) => (
+          <div key={img.id} style={styles.card}>
             <img
-              src={img}
+              src={img.image}
               alt="gallery"
               style={styles.img}
-              onClick={() => setSelectedImage(index)} // 🔥 CLICK OPEN
+              onClick={() => setSelectedImage(index)}
             />
           </div>
         ))}
       </div>
 
-      {/* 🔥 MODAL VIEW */}
+      {/* EMPTY */}
+      {images.length === 0 && (
+        <p style={styles.empty}>No images uploaded yet</p>
+      )}
+
+      {/* MODAL */}
       {selectedImage !== null && (
         <div style={styles.modal} onClick={() => setSelectedImage(null)}>
 
           <span style={styles.close}>✖</span>
 
           <img
-            src={allImages[selectedImage]}
+            src={images[selectedImage].image}
             alt="full"
             style={styles.modalImg}
           />
 
-          {/* 🔥 PREV */}
+          {/* PREV */}
           <button
             style={styles.prev}
             onClick={(e) => {
               e.stopPropagation();
               setSelectedImage(
-                selectedImage === 0 ? allImages.length - 1 : selectedImage - 1
+                selectedImage === 0 ? images.length - 1 : selectedImage - 1
               );
             }}
           >
             ⬅
           </button>
 
-          {/* 🔥 NEXT */}
+          {/* NEXT */}
           <button
             style={styles.next}
             onClick={(e) => {
               e.stopPropagation();
               setSelectedImage(
-                selectedImage === allImages.length - 1 ? 0 : selectedImage + 1
+                selectedImage === images.length - 1 ? 0 : selectedImage + 1
               );
             }}
           >
@@ -86,53 +82,63 @@ function Gallery() {
 
         </div>
       )}
-
     </div>
   );
 }
 
-const staticImages = [img1, img2, img3, img4, img5, img6];
-
 const styles = {
 
+  // 🔥 HEADER
   header: {
     textAlign: "center",
     padding: "60px 20px",
-    background: "linear-gradient(135deg, #0F766E, #22C55E)",
+    background: "linear-gradient(135deg, #065f46, #16a34a)",
     color: "white"
   },
 
   title: {
-    fontSize: "40px",
-    fontWeight: "800"
+    fontSize: "38px",
+    fontWeight: "800",
   },
 
   subtitle: {
     marginTop: "10px",
-    color: "#d1d5db"
+    color: "#d1d5db",
+    fontSize: "15px"
   },
 
+  // 🔥 GRID
   container: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
     gap: "20px",
-    padding: "40px 20px",
+    padding: "30px 15px",
     maxWidth: "1200px",
     margin: "auto"
   },
 
+  // 🔥 CARD (SQUARE FIX)
   card: {
+    borderRadius: "14px",
     overflow: "hidden",
-    borderRadius: "12px",
-    boxShadow: "0 6px 15px rgba(0,0,0,0.1)"
+    background: "white",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+    aspectRatio: "1 / 1",   // ✅ PERFECT GRID
   },
 
+  // 🔥 IMAGE FIX
   img: {
     width: "100%",
-    height: "250px",
+    height: "100%",
     objectFit: "cover",
     cursor: "pointer",
-    transition: "0.3s"
+    transition: "0.3s",
+  },
+
+  empty: {
+    textAlign: "center",
+    padding: "40px",
+    color: "#6b7280"
   },
 
   // 🔥 MODAL
@@ -142,7 +148,7 @@ const styles = {
     left: 0,
     width: "100%",
     height: "100%",
-    background: "rgba(0,0,0,0.9)",
+    background: "rgba(0,0,0,0.95)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -151,38 +157,44 @@ const styles = {
 
   modalImg: {
     maxWidth: "90%",
-    maxHeight: "80%",
-    borderRadius: "10px"
+    maxHeight: "85%",
+    borderRadius: "12px"
   },
 
   close: {
     position: "absolute",
     top: "20px",
-    right: "30px",
+    right: "25px",
     color: "white",
-    fontSize: "30px",
+    fontSize: "28px",
     cursor: "pointer"
   },
 
   prev: {
     position: "absolute",
-    left: "20px",
+    left: "15px",
     top: "50%",
-    fontSize: "30px",
-    background: "none",
+    transform: "translateY(-50%)",
+    fontSize: "28px",
+    background: "rgba(255,255,255,0.2)",
     border: "none",
     color: "white",
+    padding: "10px",
+    borderRadius: "50%",
     cursor: "pointer"
   },
 
   next: {
     position: "absolute",
-    right: "20px",
+    right: "15px",
     top: "50%",
-    fontSize: "30px",
-    background: "none",
+    transform: "translateY(-50%)",
+    fontSize: "28px",
+    background: "rgba(255,255,255,0.2)",
     border: "none",
     color: "white",
+    padding: "10px",
+    borderRadius: "50%",
     cursor: "pointer"
   }
 };
