@@ -32,8 +32,9 @@ h1, h2 {
 }
 
 .secondary {
-  background: #facc15;
-  color: black;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #065f46;
+  font-weight: 600;
 }
 
 /* BUTTON HOVER */
@@ -67,55 +68,37 @@ h1, h2 {
   transform: translateY(-8px);
 }
 
-/* LINKS */
+/* LINKS - FIXED to not affect navbar links */
 a {
   text-decoration: none;
   transition: 0.3s;
 }
 
-a:hover {
-  color: #facc15;
-}
-
-/* LAST BUTTON (Admission) */
-a:last-child:hover {
-  background: #fde047;
-}
-
-/* ========================= */
-/* 🔥 NAVBAR RESPONSIVE FIX */
-/* ========================= */
-
-@media (max-width: 768px) {
-
-  /* Hide normal menu */
-  nav div:nth-child(3) {
-    display: none;
-  }
-
-  /* Show hamburger */
-  nav div:nth-child(2) {
-    display: block !important;
-  }
-
-  /* Reduce logo text */
-  nav h2 {
-    font-size: 14px;
-  }
-
-  /* Tagline small */
-  nav p {
-    font-size: 10px;
-  }
-
+/* Only apply hover to regular links, not navbar links */
+a:not(.navbar a):not(.desktop-menu a):not(.mobile-nav-link):hover {
+  color: #f59e0b;
 }
 
 /* ========================= */
 /* 📱 MOBILE IMPROVEMENTS */
 /* ========================= */
 
-@media (max-width: 500px) {
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 30px 0;
+  }
+  
+  .cards {
+    gap: 15px;
+  }
+  
+  .card {
+    min-width: 280px;
+  }
+}
 
+@media (max-width: 500px) {
   .container {
     width: 95%;
     padding: 20px 0;
@@ -128,6 +111,7 @@ a:last-child:hover {
 
   .card {
     width: 90%;
+    min-width: auto;
   }
 
   h1 {
@@ -137,11 +121,7 @@ a:last-child:hover {
   h2 {
     font-size: 22px;
   }
-
 }
-
-
-
 
 html, body, #root {
   height: 100%;
@@ -165,4 +145,25 @@ input::placeholder {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* Ensure navbar styles are not overridden */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Make sure navbar links keep their colors */
+.navbar a,
+.desktop-menu a,
+.mobile-nav-link {
+  text-decoration: none;
+}
+
+/* Prevent any conflicting hover effects on navbar */
+.navbar a:hover,
+.desktop-menu a:hover,
+.mobile-nav-link:hover {
+  color: inherit !important;
 }

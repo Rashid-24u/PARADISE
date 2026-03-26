@@ -89,7 +89,7 @@ function AdminDashboard() {
   return (
     <div style={styles.container}>
       {/* OVERLAY */}
-      <div style={styles.overlay}>
+      <div style={isMobile ? {...styles.overlay, padding: "20px"} : {...styles.overlay, padding: "30px"}}>
         
         {/* HEADER */}
         <div style={styles.header}>
@@ -107,14 +107,14 @@ function AdminDashboard() {
           <button 
             style={styles.logout} 
             onClick={() => setShowLogoutConfirm(true)}
-            onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
-            onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
           >
             🚪 Logout
           </button>
         </div>
 
-        {/* STATS CARDS */}
+        {/* STATS CARDS - Removed Quick Access */}
         <div style={styles.statsContainer}>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>📊</div>
@@ -128,13 +128,6 @@ function AdminDashboard() {
             <div style={styles.statInfo}>
               <div style={styles.statValue}>Active</div>
               <div style={styles.statLabel}>Management</div>
-            </div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>⚡</div>
-            <div style={styles.statInfo}>
-              <div style={styles.statValue}>Quick</div>
-              <div style={styles.statLabel}>Access</div>
             </div>
           </div>
         </div>
@@ -188,12 +181,16 @@ function AdminDashboard() {
                 <button 
                   style={styles.modalCancel}
                   onClick={() => setShowLogoutConfirm(false)}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e7eb")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "#f3f4f6")}
                 >
                   Cancel
                 </button>
                 <button 
                   style={styles.modalConfirm}
                   onClick={handleLogout}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#dc2626")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "#ef4444")}
                 >
                   Logout
                 </button>
@@ -215,6 +212,49 @@ function AdminDashboard() {
             transform: translateY(0);
           }
         }
+        
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+          .admin-dashboard-card {
+            padding: 20px !important;
+          }
+          .admin-dashboard-card-title {
+            font-size: 18px !important;
+          }
+          .admin-dashboard-stat-card {
+            padding: 12px 16px !important;
+          }
+          .admin-dashboard-stat-value {
+            font-size: 20px !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .admin-dashboard-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+          .admin-dashboard-grid {
+            grid-template-columns: 1fr !important;
+            gap: 15px !important;
+          }
+          .admin-dashboard-stats-container {
+            grid-template-columns: 1fr !important;
+          }
+          .admin-dashboard-modal {
+            width: 280px !important;
+            padding: 20px !important;
+          }
+        }
       `}</style>
     </div>
   );
@@ -234,7 +274,6 @@ const styles = {
   overlay: {
     minHeight: "100vh",
     background: "linear-gradient(135deg, rgba(0,0,0,0.75), rgba(0,0,0,0.65))",
-    padding: isMobile => isMobile ? "20px" : "30px",
     backdropFilter: "blur(2px)",
   },
 
@@ -317,6 +356,7 @@ const styles = {
     alignItems: "center",
     gap: "15px",
     border: "1px solid rgba(255,255,255,0.2)",
+    transition: "transform 0.3s ease",
   },
 
   statIcon: {
@@ -485,5 +525,40 @@ const styles = {
     transition: "all 0.2s",
   },
 };
+
+// Add hover effects for cards
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = `
+    /* Card hover effect */
+    .admin-card:hover .admin-card-arrow {
+      transform: translateX(5px);
+    }
+    
+    .admin-card:hover .admin-card-icon {
+      transform: scale(1.1);
+    }
+    
+    .admin-stat-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.15);
+    }
+    
+    /* Touch device optimization */
+    @media (hover: none) and (pointer: coarse) {
+      .admin-card {
+        transition: transform 0.1s ease;
+      }
+      .admin-card:active {
+        transform: scale(0.98);
+      }
+    }
+  `;
+  
+  if (!document.head.querySelector('#admin-dashboard-styles')) {
+    styleSheet.id = 'admin-dashboard-styles';
+    document.head.appendChild(styleSheet);
+  }
+}
 
 export default AdminDashboard;

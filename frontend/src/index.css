@@ -29,11 +29,38 @@ a {
 }
 
 .btn-primary {
-  background: #0c3b2e;
+  background: #065f46;
   color: #fff;
 }
 
 .btn-secondary {
-  background: #f4b400;
-  color: #000;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #065f46;
+  font-weight: 600;
+}
+
+/* Ensure navbar links are not affected by global styles */
+.navbar a,
+.navbar button,
+.desktop-menu a,
+.mobile-nav-link {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Restore button styles for admin and admission buttons */
+.navbar button.admin-btn {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 0 15px;
+  }
 }

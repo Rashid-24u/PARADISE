@@ -71,7 +71,7 @@ function Navbar() {
     { name: "🏠 Home", path: "/" },
     { name: "📖 About", path: "/about" },
     { name: "📚 Courses", path: "/courses" },
-    { name: "Abacus ✨", path: "/abacus" },
+    { name: "🧮 Abacus ✨", path: "/abacus" },
     { name: "🖼️ Gallery", path: "/gallery" },
     { name: "📢 Notice", path: "/notice" },
     { name: "📞 Contact", path: "/contact" }
@@ -96,7 +96,9 @@ function Navbar() {
             className="navbar-logo"
           />
           <div style={styles.logoTextContainer}>
-            <h2 style={styles.logoText}>Paradise Islamic School</h2>
+            <h2 className="golden-shine-text" style={styles.logoText}>
+              Paradise Islamic Pre-School
+            </h2>
             <p style={styles.tagline}>Learn Today, Lead Tomorrow</p>
           </div>
         </div>
@@ -110,19 +112,13 @@ function Navbar() {
                 to={item.path}
                 onClick={(e) => handleNavClick(e, item.path)}
                 style={({ isActive }) => {
-                  if (item.name === "Abacus ✨") {
+                  if (item.name === "🧮 Abacus ✨") {
                     return isActive ? styles.abacusActiveLink : styles.abacusLink;
                   }
                   return isActive ? styles.activeLink : styles.link;
                 }}
               >
-                {item.name === "Abacus ✨" ? (
-                  <span style={styles.abacusText}>
-                    🧮 Abacus ✨
-                  </span>
-                ) : (
-                  <span>{item.name}</span>
-                )}
+                <span>{item.name}</span>
               </NavLink>
             ))}
 
@@ -178,7 +174,7 @@ function Navbar() {
         )}
       </nav>
 
-      {/* MOBILE MENU - Separate component, only visible on mobile when open */}
+      {/* MOBILE MENU - Only visible on mobile when open */}
       {isMobile && menuOpen && (
         <>
           {/* Overlay */}
@@ -202,13 +198,7 @@ function Navbar() {
                     ...(isActive ? styles.mobileActiveLink : {})
                   })}
                 >
-                  {item.name === "Abacus ✨" ? (
-                    <span style={styles.mobileAbacusText}>
-                      🧮 Abacus ✨
-                    </span>
-                  ) : (
-                    <span>{item.name}</span>
-                  )}
+                  <span>{item.name}</span>
                 </NavLink>
               ))}
 
@@ -279,12 +269,13 @@ const styles = {
   },
 
   logoText: {
-    fontSize: "clamp(14px, 3vw, 18px)",
     margin: 0,
+    fontSize: "clamp(14px, 3vw, 18px)",
     fontWeight: "700",
-    color: "white",
     lineHeight: 1.3,
     letterSpacing: "-0.3px",
+    position: "relative",
+    display: "inline-block",
   },
 
   tagline: {
@@ -300,12 +291,14 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
   },
 
   link: {
     color: "#f0fdf4",
     textDecoration: "none",
-    padding: "8px 16px",
+    padding: "8px 14px",
     transition: "all 0.2s ease",
     fontSize: "14px",
     fontWeight: "500",
@@ -319,7 +312,7 @@ const styles = {
   activeLink: {
     color: "#facc15",
     textDecoration: "none",
-    padding: "8px 16px",
+    padding: "8px 14px",
     fontWeight: "600",
     fontSize: "14px",
     background: "rgba(250, 204, 21, 0.15)",
@@ -327,9 +320,10 @@ const styles = {
     whiteSpace: "nowrap",
   },
 
+  // 🔥 ABACUS BUTTON - GOLD HIGHLIGHT
   abacusLink: {
-    background: "linear-gradient(135deg, #f59e0b, #d97706)",
-    color: "white",
+    background: "linear-gradient(135deg, #f4fe35, #eab308)",
+    color: "#064e3b",
     textDecoration: "none",
     padding: "8px 18px",
     transition: "all 0.3s ease",
@@ -338,15 +332,18 @@ const styles = {
     borderRadius: "30px",
     display: "inline-flex",
     alignItems: "center",
-    boxShadow: "0 4px 15px rgba(245, 158, 11, 0.4)",
-    animation: "pulse 2s infinite",
+    justifyContent: "center",
+    boxShadow: "0 4px 15px rgba(250, 204, 21, 0.4)",
+    animation: "glow 2s infinite",
     textAlign: "center",
     whiteSpace: "nowrap",
+    minWidth: "105px",
   },
 
+  // 🔥 ABACUS ACTIVE - ENHANCED GOLD
   abacusActiveLink: {
-    background: "linear-gradient(135deg, #fbbf24, #f59e0b)",
-    color: "#065f46",
+    background: "linear-gradient(135deg, #2c8f95, #15c79d)",
+    color: "#022c22",
     textDecoration: "none",
     padding: "8px 18px",
     transition: "all 0.3s ease",
@@ -355,23 +352,20 @@ const styles = {
     borderRadius: "30px",
     display: "inline-flex",
     alignItems: "center",
-    boxShadow: "0 4px 20px rgba(245, 158, 11, 0.6)",
-    transform: "scale(1.02)",
+    justifyContent: "center",
+    boxShadow: "0 4px 20px rgba(245, 158, 11, 0.7)",
     textAlign: "center",
     whiteSpace: "nowrap",
+    minWidth: "105px",
+    transform: "scale(1.05)",
   },
 
-  abacusText: {
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-  },
-
+  // 🎓 ADMISSION BUTTON - ORANGE PREMIUM CTA
   btn: {
-    background: "linear-gradient(135deg, #facc15, #fde047)",
+    background: "linear-gradient(135deg, #fb923c, #ea580c)",
     padding: "8px 20px",
     borderRadius: "30px",
-    color: "#065f46",
+    color: "#ffffff",
     textDecoration: "none",
     fontWeight: "700",
     fontSize: "14px",
@@ -379,21 +373,24 @@ const styles = {
     display: "inline-flex",
     alignItems: "center",
     textAlign: "center",
-    boxShadow: "0 2px 8px rgba(250, 204, 21, 0.3)",
+    boxShadow: "0 4px 15px rgba(234, 88, 12, 0.4)",
     whiteSpace: "nowrap",
   },
 
+  // 🔥 ACTIVE ADMISSION - BRIGHTER ORANGE
   activeBtn: {
-    background: "linear-gradient(135deg, #fde047, #facc15)",
+    background: "linear-gradient(135deg, #fdba74, #ea580c)",
     padding: "8px 20px",
     borderRadius: "30px",
-    color: "#065f46",
+    color: "#ffffff",
     fontWeight: "800",
     fontSize: "14px",
-    boxShadow: "0 2px 12px rgba(250, 204, 21, 0.4)",
+    boxShadow: "0 4px 20px rgba(234, 88, 12, 0.6)",
     whiteSpace: "nowrap",
+    transform: "scale(1.02)",
   },
 
+  // 👤 ADMIN BUTTON - BLUE
   adminBtn: {
     background: "linear-gradient(135deg, #3b82f6, #2563eb)",
     color: "white",
@@ -438,7 +435,6 @@ const styles = {
     borderRadius: "2px",
   },
 
-  // Mobile menu styles
   overlay: {
     position: "fixed",
     top: 0,
@@ -490,13 +486,6 @@ const styles = {
     fontWeight: "600",
   },
 
-  mobileAbacusText: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "6px",
-  },
-
   mobileAdminBtn: {
     background: "linear-gradient(135deg, #3b82f6, #2563eb)",
     color: "white",
@@ -511,10 +500,10 @@ const styles = {
   },
 
   mobileBtn: {
-    background: "linear-gradient(135deg, #facc15, #fde047)",
+    background: "linear-gradient(135deg, #fb923c, #ea580c)",
     padding: "14px 20px",
     borderRadius: "30px",
-    color: "#065f46",
+    color: "#ffffff",
     textDecoration: "none",
     fontWeight: "700",
     fontSize: "16px",
@@ -522,11 +511,13 @@ const styles = {
     display: "block",
     textAlign: "center",
     marginTop: "8px",
+    boxShadow: "0 4px 15px rgba(234, 88, 12, 0.4)",
   },
 
   mobileActiveBtn: {
-    background: "linear-gradient(135deg, #fde047, #facc15)",
+    background: "linear-gradient(135deg, #fdba74, #ea580c)",
     fontWeight: "800",
+    color: "#ffffff",
   },
 };
 
@@ -554,18 +545,50 @@ if (typeof document !== 'undefined') {
       }
     }
     
-    @keyframes pulse {
+    @keyframes goldenShine {
       0% {
-        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-        transform: scale(1);
-      }
-      50% {
-        box-shadow: 0 6px 25px rgba(245, 158, 11, 0.6);
-        transform: scale(1.02);
+        background-position: -200% 0;
       }
       100% {
-        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-        transform: scale(1);
+        background-position: 200% 0;
+      }
+    }
+    
+    .golden-shine-text {
+      position: relative;
+      background: linear-gradient(
+        90deg,
+        #ffffff,
+        #fbbf24,
+        #f59e0b,
+        #facc15,
+        #ffd966,
+        #fbbf24,
+        #ffffff
+      );
+      background-size: 300% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: goldenShine 4s linear infinite;
+      display: inline-block;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+    
+    .golden-shine-text:hover {
+      animation: goldenShine 1.5s linear infinite;
+    }
+    
+    @keyframes glow {
+      0% {
+        box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4);
+      }
+      50% {
+        box-shadow: 0 6px 25px rgba(250, 204, 21, 0.7);
+      }
+      100% {
+        box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4);
       }
     }
     
@@ -577,7 +600,6 @@ if (typeof document !== 'undefined') {
       
       .desktop-menu a:not(.abacus-link):hover {
         background: rgba(255, 255, 255, 0.1);
-        transform: translateY(-2px);
       }
       
       .admin-btn:hover {
@@ -585,14 +607,14 @@ if (typeof document !== 'undefined') {
         box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
       }
       
-      .admission-btn:hover {
+      .abacus-link:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4);
+        box-shadow: 0 8px 30px rgba(250, 204, 21, 0.7);
       }
       
-      .abacus-link:hover {
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 0 8px 30px rgba(245, 158, 11, 0.7);
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5);
       }
     }
     
@@ -603,6 +625,11 @@ if (typeof document !== 'undefined') {
       .mobile-btn:active {
         transform: scale(0.98);
         transition: transform 0.05s;
+      }
+      
+      .golden-shine-text {
+        animation: goldenShine 5s linear infinite;
+        font-size: 13px;
       }
     }
     
@@ -618,6 +645,79 @@ if (typeof document !== 'undefined') {
     .mobile-menu-container::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.3);
       border-radius: 4px;
+    }
+    
+    /* Responsive fixes for desktop menu */
+    @media (max-width: 1200px) {
+      .desktop-menu {
+        gap: 6px !important;
+      }
+      
+      .desktop-menu a, .desktop-menu button {
+        padding: 6px 12px !important;
+        font-size: 13px !important;
+      }
+      
+      .abacus-link, .abacus-active-link {
+        min-width: 95px !important;
+        padding: 6px 14px !important;
+        font-size: 13px !important;
+      }
+    }
+    
+    @media (max-width: 1050px) {
+      .desktop-menu {
+        gap: 4px !important;
+      }
+      
+      .desktop-menu a, .desktop-menu button {
+        padding: 5px 10px !important;
+        font-size: 12px !important;
+      }
+      
+      .abacus-link, .abacus-active-link {
+        min-width: 88px !important;
+        padding: 5px 12px !important;
+        font-size: 12px !important;
+      }
+    }
+    
+    @media (max-width: 950px) {
+      .desktop-menu {
+        gap: 2px !important;
+      }
+      
+      .desktop-menu a, .desktop-menu button {
+        padding: 4px 8px !important;
+        font-size: 11px !important;
+      }
+      
+      .abacus-link, .abacus-active-link {
+        min-width: 82px !important;
+        padding: 4px 10px !important;
+        font-size: 11px !important;
+      }
+    }
+    
+    @media (max-width: 850px) {
+      .golden-shine-text {
+        font-size: 11px !important;
+      }
+      
+      .tagline {
+        font-size: 7px !important;
+      }
+      
+      .navbar-logo {
+        width: 38px !important;
+        height: 38px !important;
+      }
+    }
+    
+    .navbar {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 1000 !important;
     }
   `;
   

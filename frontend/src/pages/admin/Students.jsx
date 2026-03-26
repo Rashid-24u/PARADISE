@@ -185,6 +185,9 @@ function Students() {
       setMessage(`🗑️ ${student.name} deleted successfully`);
       setMessageType("success");
       fetchStudents();
+      if (selectedStudent?.id === student.id) {
+        setSelectedStudent(null);
+      }
     } catch (error) {
       setMessage("❌ Error deleting student");
       setMessageType("error");
@@ -221,12 +224,23 @@ function Students() {
     return classMatch && nameMatch;
   });
 
-  // COUNT
+  // COUNT BY CLASS
   const classCount = {};
   students.forEach((s) => {
     const cls = formatClassForDisplay(s.student_class);
     classCount[cls] = (classCount[cls] || 0) + 1;
   });
+
+  // Filtered count by class
+  const filteredClassCount = {};
+  filtered.forEach((s) => {
+    const cls = formatClassForDisplay(s.student_class);
+    filteredClassCount[cls] = (filteredClassCount[cls] || 0) + 1;
+  });
+
+  // Get total counts
+  const totalStudents = students.length;
+  const filteredTotal = filtered.length;
 
   return (
     <div style={styles.container}>
@@ -235,12 +249,20 @@ function Students() {
         <button
           style={styles.backBtn}
           onClick={() => navigate("/admin-dashboard")}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 6px 20px rgba(6,95,70,0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+          }}
         >
           ⬅ {isMobile ? "Back" : "Back to Dashboard"}
         </button>
       </div>
 
-      <h2 style={styles.title}>Students Management</h2>
+      <h2 style={styles.title}>🎓 Students Management</h2>
 
       {/* MESSAGE */}
       {message && (
@@ -317,7 +339,18 @@ function Students() {
           )}
         </div>
 
-        <button style={styles.addBtn} onClick={handleSubmit}>
+        <button 
+          style={styles.addBtn} 
+          onClick={handleSubmit}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 6px 20px rgba(16,185,129,0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 2px 8px rgba(16,185,129,0.3)";
+          }}
+        >
           {editingId ? "✏️ Update Student" : "➕ Add Student"}
         </button>
         
@@ -328,6 +361,8 @@ function Students() {
               setEditingId(null);
               setForm({ name: "", student_class: "", phone: "" });
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#5a6268")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#6b7280")}
           >
             Cancel Edit
           </button>
@@ -350,32 +385,139 @@ function Students() {
         />
       </div>
 
-      {/* COUNT */}
+      {/* TOTAL STUDENTS COUNT */}
+      <div style={styles.totalCountContainer}>
+        <div style={styles.totalCountCard}>
+          <span style={styles.totalCountIcon}>👨‍🎓</span>
+          <div>
+            <div style={styles.totalCountLabel}>Total Students</div>
+            <div style={styles.totalCountValue}>{totalStudents}</div>
+          </div>
+        </div>
+        {search || filterClass ? (
+          <div style={styles.filteredCountCard}>
+            <span style={styles.filteredCountIcon}>🔍</span>
+            <div>
+              <div style={styles.filteredCountLabel}>Filtered Results</div>
+              <div style={styles.filteredCountValue}>{filteredTotal} of {totalStudents}</div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      {/* CLASS WISE COUNT */}
       {Object.keys(classCount).length > 0 && (
         <div style={styles.countBox}>
-          {Object.keys(classCount).sort((a, b) => {
-            const order = { "Pre KG": 1, "LKG": 2, "UKG": 3 };
-            return (order[a] || 99) - (order[b] || 99);
-          }).map((c) => (
-            <span key={c} style={styles.count}>
-              {c}: {classCount[c]}
-            </span>
-          ))}
+          <div style={styles.countBoxTitle}>📊 Class-wise Distribution</div>
+          <div style={styles.countGrid}>
+            {Object.keys(classCount).sort((a, b) => {
+              const order = { "Pre KG": 1, "LKG": 2, "UKG": 3 };
+              const numA = parseInt(a);
+              const numB = parseInt(b);
+              if (order[a] && order[b]) return order[a] - order[b];
+              if (order[a]) return -1;
+              if (order[b]) return 1;
+              return numA - numB;
+            }).map((c) => (
+              <div key={c} style={styles.countItem}>
+                <span style={styles.countClass}>{c}</span>
+                <span style={styles.countNumber}>{classCount[c]}</span>
+                {filterClass && filteredClassCount[c] !== undefined && (
+                  <span style={styles.countFilteredBadge}>
+                    (filtered: {filteredClassCount[c]})
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* TABLE / MOBILE CARDS */}
       <div style={styles.tableWrapper}>
-        {isMobile ? (
+        {!isMobile ? (
+          <table style={styles.table}>
+            <thead>
+              <tr style={styles.tableHeader}>
+                <th style={styles.thNumber}>#</th>
+                <th style={styles.th}>Name</th>
+                <th style={styles.th}>Class</th>
+                <th style={styles.th}>Phone</th>
+                <th style={styles.th}>Actions</th>
+               </tr>
+            </thead>
+            <tbody>
+              {filtered.map((s, index) => (
+                <tr
+                  key={s.id}
+                  style={{
+                    ...styles.row,
+                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
+                  }}
+                  onClick={() => setSelectedStudent(s)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#f3f4f6";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor =
+                      index % 2 === 0 ? "#ffffff" : "#f9fafb";
+                  }}
+                >
+                  <td style={styles.tdNumber}>
+                    <span style={styles.rowNumber}>{index + 1}</span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.studentName}>{s.name}</span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.classBadge}>
+                      {formatClassForDisplay(s.student_class)}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.phoneNumber}>{s.phone || "—"}</span>
+                  </td>
+                  <td style={styles.td}>
+                    <button
+                      style={styles.editBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        editStudent(s);
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      style={styles.deleteBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteStudent(s);
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+                    >
+                      🗑️ Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
           // Mobile Card View
           <div style={styles.mobileCardContainer}>
-            {filtered.map((s) => (
+            {filtered.map((s, index) => (
               <div
                 key={s.id}
                 style={styles.mobileCard}
                 onClick={() => setSelectedStudent(s)}
               >
                 <div style={styles.mobileCardHeader}>
+                  <div style={styles.mobileRowNumber}>
+                    <span style={styles.mobileNumberBadge}>{index + 1}</span>
+                  </div>
                   <div style={styles.mobileCardAvatar}>
                     {s.name.charAt(0).toUpperCase()}
                   </div>
@@ -413,85 +555,33 @@ function Students() {
                 </div>
               </div>
             ))}
-            {filtered.length === 0 && (
-              <div style={styles.noResults}>No students found</div>
-            )}
           </div>
-        ) : (
-          // Desktop Table View
-          <table style={styles.table}>
-            <thead>
-              <tr style={styles.tableHeader}>
-                <th style={styles.th}>Name</th>
-                <th style={styles.th}>Class</th>
-                <th style={styles.th}>Phone</th>
-                <th style={styles.th}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((s, index) => (
-                <tr
-                  key={s.id}
-                  style={{
-                    ...styles.row,
-                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
-                  }}
-                  onClick={() => setSelectedStudent(s)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f3f4f6";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor =
-                      index % 2 === 0 ? "#ffffff" : "#f9fafb";
-                  }}
-                >
-                  <td style={styles.td}>
-                    <span style={styles.studentName}>{s.name}</span>
-                  </td>
-                  <td style={styles.td}>
-                    <span style={styles.classBadge}>
-                      {formatClassForDisplay(s.student_class)}
-                    </span>
-                  </td>
-                  <td style={styles.td}>
-                    <span style={styles.phoneNumber}>{s.phone || "—"}</span>
-                  </td>
-                  <td style={styles.td}>
-                    <button
-                      style={styles.editBtn}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        editStudent(s);
-                      }}
-                    >
-                      ✏️ Edit
-                    </button>
-                    <button
-                      style={styles.deleteBtn}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteStudent(s);
-                      }}
-                    >
-                      🗑️ Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         )}
 
-        {!isMobile && filtered.length === 0 && (
+        {filtered.length === 0 && (
           <div style={styles.noResults}>No students found</div>
+        )}
+        
+        {/* Show filtered count */}
+        {filtered.length > 0 && (
+          <div style={styles.totalCountFooter}>
+            Showing <strong>{filtered.length}</strong> of <strong>{totalStudents}</strong> students
+            {search && <span> (Search: "{search}")</span>}
+            {filterClass && <span> (Class: {filterClass})</span>}
+          </div>
         )}
       </div>
 
-      {/* STUDENT DETAIL CARD MODAL - WITHOUT ID */}
+      {/* STUDENT DETAIL CARD MODAL */}
       {selectedStudent && (
         <div style={styles.overlay} onClick={() => setSelectedStudent(null)}>
           <div style={isMobile ? styles.cardMobile : styles.card} onClick={(e) => e.stopPropagation()}>
-            <button style={styles.cardClose} onClick={() => setSelectedStudent(null)}>
+            <button 
+              style={styles.cardClose} 
+              onClick={() => setSelectedStudent(null)}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e7eb")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+            >
               ✕
             </button>
 
@@ -524,6 +614,8 @@ function Students() {
                   editStudent(selectedStudent);
                   setSelectedStudent(null);
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#2563eb")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#3b82f6")}
               >
                 ✏️ Edit Profile
               </button>
@@ -533,6 +625,8 @@ function Students() {
                   deleteStudent(selectedStudent);
                   setSelectedStudent(null);
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#dc2626")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#ef4444")}
               >
                 🗑️ Delete Student
               </button>
@@ -546,34 +640,35 @@ function Students() {
 
 const styles = {
   container: {
-    padding: "15px",
-    maxWidth: "1200px",
+    padding: "clamp(15px, 3vw, 20px)",
+    maxWidth: "1400px",
     margin: "auto",
     fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+    background: "linear-gradient(135deg, #f8fafc, #ffffff)",
+    minHeight: "100vh",
   },
 
   topBar: {
-    marginBottom: "15px",
+    marginBottom: "clamp(15px, 3vw, 20px)",
   },
 
   backBtn: {
     background: "linear-gradient(135deg, #065f46, #047857)",
     color: "white",
-    padding: "10px 16px",
+    padding: "clamp(8px, 2vw, 10px) clamp(16px, 3vw, 20px)",
     borderRadius: "10px",
     border: "none",
     cursor: "pointer",
-    fontSize: "14px",
+    fontSize: "clamp(13px, 2.5vw, 14px)",
     fontWeight: "500",
     transition: "all 0.2s",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    WebkitTapHighlightColor: "transparent",
   },
 
   title: {
     textAlign: "center",
-    marginBottom: "20px",
-    fontSize: "clamp(24px, 6vw, 32px)",
+    marginBottom: "clamp(20px, 4vw, 25px)",
+    fontSize: "clamp(24px, 5vw, 32px)",
     fontWeight: "700",
     background: "linear-gradient(135deg, #065f46, #10b981)",
     WebkitBackgroundClip: "text",
@@ -608,15 +703,14 @@ const styles = {
 
   form: {
     background: "white",
-    padding: "20px",
+    padding: "clamp(20px, 4vw, 25px)",
     borderRadius: "20px",
     maxWidth: "700px",
-    margin: "auto",
+    margin: "0 auto 25px",
     display: "flex",
     flexDirection: "column",
     gap: "12px",
     boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
-    marginBottom: "20px",
     border: "1px solid #e5e7eb",
   },
 
@@ -626,48 +720,48 @@ const styles = {
   },
 
   input: {
-    padding: "12px 14px",
+    padding: "clamp(10px, 2.5vw, 12px) clamp(12px, 3vw, 14px)",
     borderRadius: "12px",
     border: "1px solid #e5e7eb",
-    fontSize: "16px",
+    fontSize: "clamp(14px, 2.5vw, 16px)",
     transition: "all 0.2s",
     outline: "none",
     fontFamily: "inherit",
-    WebkitAppearance: "none",
+    width: "100%",
+    boxSizing: "border-box",
   },
 
   addBtn: {
     background: "linear-gradient(135deg, #059669, #10b981)",
     color: "white",
-    padding: "12px",
+    padding: "clamp(10px, 2.5vw, 12px)",
     borderRadius: "12px",
     border: "none",
     fontWeight: "600",
     cursor: "pointer",
-    fontSize: "16px",
+    fontSize: "clamp(14px, 2.8vw, 16px)",
     transition: "all 0.2s",
     boxShadow: "0 2px 8px rgba(16,185,129,0.3)",
-    WebkitTapHighlightColor: "transparent",
+    marginTop: "5px",
   },
 
   cancelBtn: {
     background: "#6b7280",
     color: "white",
-    padding: "12px",
+    padding: "clamp(10px, 2.5vw, 12px)",
     borderRadius: "12px",
     border: "none",
     fontWeight: "600",
     cursor: "pointer",
-    fontSize: "16px",
+    fontSize: "clamp(14px, 2.8vw, 16px)",
     transition: "all 0.2s",
-    WebkitTapHighlightColor: "transparent",
   },
 
   controls: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: "15px",
-    marginBottom: "20px",
+    marginBottom: "25px",
   },
 
   controlsMobile: {
@@ -677,20 +771,118 @@ const styles = {
     marginBottom: "20px",
   },
 
-  countBox: {
-    marginBottom: "15px",
+  totalCountContainer: {
     display: "flex",
+    gap: "15px",
+    marginBottom: "20px",
     flexWrap: "wrap",
-    gap: "8px",
   },
 
-  count: {
-    background: "linear-gradient(135deg, #fef3c7, #fde68a)",
-    color: "#92400e",
-    padding: "6px 14px",
-    borderRadius: "20px",
-    fontSize: "13px",
+  totalCountCard: {
+    background: "linear-gradient(135deg, #065f46, #10b981)",
+    borderRadius: "16px",
+    padding: "clamp(15px, 3vw, 20px) clamp(20px, 4vw, 25px)",
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+    color: "white",
+    flex: 1,
+    minWidth: "180px",
+    boxShadow: "0 4px 15px rgba(6,95,70,0.2)",
+  },
+
+  totalCountIcon: {
+    fontSize: "clamp(32px, 6vw, 40px)",
+  },
+
+  totalCountLabel: {
+    fontSize: "clamp(12px, 2.2vw, 13px)",
+    opacity: 0.9,
+  },
+
+  totalCountValue: {
+    fontSize: "clamp(28px, 5vw, 36px)",
+    fontWeight: "800",
+    lineHeight: 1,
+  },
+
+  filteredCountCard: {
+    background: "linear-gradient(135deg, #f59e0b, #d97706)",
+    borderRadius: "16px",
+    padding: "clamp(15px, 3vw, 20px) clamp(20px, 4vw, 25px)",
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+    color: "white",
+    flex: 1,
+    minWidth: "180px",
+    boxShadow: "0 4px 15px rgba(245,158,11,0.2)",
+  },
+
+  filteredCountIcon: {
+    fontSize: "clamp(32px, 6vw, 40px)",
+  },
+
+  filteredCountLabel: {
+    fontSize: "clamp(12px, 2.2vw, 13px)",
+    opacity: 0.9,
+  },
+
+  filteredCountValue: {
+    fontSize: "clamp(24px, 4.5vw, 32px)",
+    fontWeight: "700",
+    lineHeight: 1,
+  },
+
+  countBox: {
+    background: "white",
+    borderRadius: "16px",
+    padding: "clamp(15px, 3vw, 20px)",
+    marginBottom: "25px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    border: "1px solid #e5e7eb",
+  },
+
+  countBoxTitle: {
+    fontSize: "clamp(14px, 2.8vw, 16px)",
     fontWeight: "600",
+    color: "#374151",
+    marginBottom: "12px",
+  },
+
+  countGrid: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+  },
+
+  countItem: {
+    background: "linear-gradient(135deg, #fef3c7, #fde68a)",
+    padding: "8px 16px",
+    borderRadius: "30px",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "clamp(12px, 2.2vw, 13px)",
+  },
+
+  countClass: {
+    fontWeight: "600",
+    color: "#92400e",
+  },
+
+  countNumber: {
+    fontWeight: "700",
+    color: "#065f46",
+    background: "white",
+    padding: "2px 8px",
+    borderRadius: "20px",
+  },
+
+  countFilteredBadge: {
+    fontSize: "11px",
+    color: "#f59e0b",
+    fontWeight: "500",
   },
 
   tableWrapper: {
@@ -704,7 +896,7 @@ const styles = {
     width: "100%",
     borderCollapse: "collapse",
     fontFamily: "inherit",
-    minWidth: "500px",
+    minWidth: "550px",
   },
 
   tableHeader: {
@@ -712,11 +904,22 @@ const styles = {
     borderBottom: "2px solid #e2e8f0",
   },
 
+  thNumber: {
+    padding: "clamp(12px, 2.5vw, 14px) clamp(8px, 1.5vw, 10px)",
+    textAlign: "center",
+    fontWeight: "600",
+    fontSize: "clamp(12px, 2.2vw, 13px)",
+    color: "#1e293b",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    width: "60px",
+  },
+
   th: {
-    padding: "14px 12px",
+    padding: "clamp(12px, 2.5vw, 14px) clamp(10px, 2vw, 12px)",
     textAlign: "left",
     fontWeight: "600",
-    fontSize: "13px",
+    fontSize: "clamp(12px, 2.2vw, 13px)",
     color: "#1e293b",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
@@ -728,15 +931,34 @@ const styles = {
     borderBottom: "1px solid #f1f5f9",
   },
 
-  td: {
-    padding: "12px 12px",
+  tdNumber: {
+    padding: "clamp(10px, 2vw, 12px) clamp(8px, 1.5vw, 10px)",
     verticalAlign: "middle",
+    textAlign: "center",
+  },
+
+  td: {
+    padding: "clamp(10px, 2vw, 12px) clamp(8px, 1.8vw, 12px)",
+    verticalAlign: "middle",
+  },
+
+  rowNumber: {
+    display: "inline-block",
+    width: "30px",
+    height: "30px",
+    lineHeight: "30px",
+    textAlign: "center",
+    background: "linear-gradient(135deg, #f3f4f6, #e5e7eb)",
+    borderRadius: "50%",
+    fontWeight: "600",
+    fontSize: "12px",
+    color: "#065f46",
   },
 
   studentName: {
     fontWeight: "600",
     color: "#0f172a",
-    fontSize: "14px",
+    fontSize: "clamp(13px, 2.5vw, 14px)",
   },
 
   classBadge: {
@@ -744,7 +966,7 @@ const styles = {
     color: "#1e40af",
     padding: "4px 10px",
     borderRadius: "20px",
-    fontSize: "12px",
+    fontSize: "clamp(11px, 2vw, 12px)",
     fontWeight: "500",
     display: "inline-block",
   },
@@ -752,7 +974,7 @@ const styles = {
   phoneNumber: {
     color: "#475569",
     fontFamily: "monospace",
-    fontSize: "13px",
+    fontSize: "clamp(12px, 2.2vw, 13px)",
   },
 
   editBtn: {
@@ -763,10 +985,9 @@ const styles = {
     marginRight: "6px",
     border: "none",
     cursor: "pointer",
-    fontSize: "12px",
+    fontSize: "clamp(11px, 2vw, 12px)",
     fontWeight: "500",
     transition: "all 0.2s",
-    WebkitTapHighlightColor: "transparent",
   },
 
   deleteBtn: {
@@ -776,17 +997,33 @@ const styles = {
     borderRadius: "8px",
     border: "none",
     cursor: "pointer",
-    fontSize: "12px",
+    fontSize: "clamp(11px, 2vw, 12px)",
     fontWeight: "500",
     transition: "all 0.2s",
-    WebkitTapHighlightColor: "transparent",
   },
 
+  totalCountFooter: {
+    textAlign: "center",
+    padding: "clamp(12px, 2.5vw, 16px)",
+    fontSize: "clamp(12px, 2.2vw, 13px)",
+    color: "#6b7280",
+    borderTop: "1px solid #e2e8f0",
+    background: "#f8fafc",
+  },
+
+  noResults: {
+    textAlign: "center",
+    padding: "40px",
+    color: "#6b7280",
+    fontSize: "14px",
+  },
+
+  // Mobile Card View
   mobileCardContainer: {
     display: "flex",
     flexDirection: "column",
     gap: "12px",
-    padding: "12px",
+    padding: "16px",
   },
 
   mobileCard: {
@@ -797,7 +1034,6 @@ const styles = {
     border: "1px solid #e5e7eb",
     cursor: "pointer",
     transition: "all 0.2s",
-    WebkitTapHighlightColor: "transparent",
   },
 
   mobileCardHeader: {
@@ -805,6 +1041,23 @@ const styles = {
     alignItems: "center",
     gap: "12px",
     marginBottom: "12px",
+  },
+
+  mobileRowNumber: {
+    marginRight: "4px",
+  },
+
+  mobileNumberBadge: {
+    display: "inline-block",
+    width: "32px",
+    height: "32px",
+    lineHeight: "32px",
+    textAlign: "center",
+    background: "linear-gradient(135deg, #f3f4f6, #e5e7eb)",
+    borderRadius: "50%",
+    fontWeight: "600",
+    fontSize: "13px",
+    color: "#065f46",
   },
 
   mobileCardAvatar: {
@@ -868,7 +1121,6 @@ const styles = {
     fontSize: "14px",
     fontWeight: "500",
     cursor: "pointer",
-    WebkitTapHighlightColor: "transparent",
   },
 
   mobileDeleteBtn: {
@@ -881,16 +1133,9 @@ const styles = {
     fontSize: "14px",
     fontWeight: "500",
     cursor: "pointer",
-    WebkitTapHighlightColor: "transparent",
   },
 
-  noResults: {
-    textAlign: "center",
-    padding: "40px",
-    color: "#6b7280",
-    fontSize: "14px",
-  },
-
+  // Modal Styles
   overlay: {
     position: "fixed",
     inset: 0,
@@ -938,7 +1183,6 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
-    WebkitTapHighlightColor: "transparent",
   },
 
   cardHeader: {
@@ -1034,7 +1278,6 @@ const styles = {
     fontWeight: "500",
     cursor: "pointer",
     fontSize: "14px",
-    WebkitTapHighlightColor: "transparent",
   },
 
   cardDeleteBtn: {
@@ -1047,7 +1290,6 @@ const styles = {
     fontWeight: "500",
     cursor: "pointer",
     fontSize: "14px",
-    WebkitTapHighlightColor: "transparent",
   },
 };
 
