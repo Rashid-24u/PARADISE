@@ -26,6 +26,8 @@ function AdminDashboard() {
   const handleLogout = () => {
     localStorage.removeItem("admin");
     localStorage.removeItem("username");
+    localStorage.removeItem("teacher");
+    localStorage.removeItem("student");
     navigate("/admin-login");
   };
 
@@ -44,6 +46,13 @@ function AdminDashboard() {
       color: "#10b981",
       description: "Manage teacher profiles"
     },
+     { 
+    title: "Courses", 
+    icon: "📚", 
+    path: "/admin/courses", 
+    color: "#8b5cf6",
+    description: "Manage class levels"
+  },
     { 
       title: "Fees", 
       icon: "💰", 
@@ -119,7 +128,7 @@ function AdminDashboard() {
           <div style={styles.statCard}>
             <div style={styles.statIcon}>📊</div>
             <div style={styles.statInfo}>
-              <div style={styles.statValue}>5</div>
+              <div style={styles.statValue}>6</div>
               <div style={styles.statLabel}>Modules</div>
             </div>
           </div>

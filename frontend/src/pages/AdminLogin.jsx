@@ -36,12 +36,22 @@ function AdminLogin() {
         const data = await res.json();
 
         localStorage.setItem("admin", "true");
-        localStorage.setItem("username", data.username);
+        localStorage.setItem("username", data.username || "");
+        if (data.user_id != null) {
+          localStorage.setItem("admin_user_id", String(data.user_id));
+        }
 
         alert("Login Success ✅");
         window.location.href = "/admin-dashboard";
       } else {
-        alert("Invalid Credentials ❌");
+        let msg = "Invalid credentials";
+        try {
+          const err = await res.json();
+          if (err.message) msg = err.message;
+        } catch {
+          /* ignore */
+        }
+        alert(msg);
       }
     } catch (error) {
       alert("Server error ❌");
