@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 function CoursesAdmin() {
   const [courses, setCourses] = useState([]);
-  const [form, setForm] = useState({ name: "", description: "", total_periods: 4 });
+  const [form, setForm] = useState({ name: "", description: "" });  // Removed total_periods
   const [editId, setEditId] = useState(null);
   const [search, setSearch] = useState("");
 
@@ -25,11 +25,6 @@ function CoursesAdmin() {
       return;
     }
 
-    if (!form.total_periods || Number(form.total_periods) <= 0) {
-      alert("Total periods must be a positive number");
-      return;
-    }
-
     const method = editId ? "PUT" : "POST";
     const url = editId ? API + editId + "/" : API;
 
@@ -39,11 +34,11 @@ function CoursesAdmin() {
       body: JSON.stringify({
         name: form.name,
         description: form.description,
-        total_periods: Number(form.total_periods),
+        // Remove total_periods
       }),
     });
 
-    setForm({ name: "", description: "", total_periods: 4 });
+    setForm({ name: "", description: "" });
     setEditId(null);
     fetchCourses();
   };
@@ -64,7 +59,6 @@ function CoursesAdmin() {
     setForm({
       name: c.name,
       description: c.description,
-      total_periods: c.total_periods ?? 4,
     });
     setEditId(c.id);
   };
@@ -79,7 +73,7 @@ function CoursesAdmin() {
       {/* Header */}
       <div style={styles.header}>
         <h2 style={styles.headerTitle}>📚 Course Management</h2>
-        <p style={styles.headerSubtitle}>Manage classes and total periods for attendance</p>
+        <p style={styles.headerSubtitle}>Manage classes (Pre-KG, LKG, UKG, 1st to 5th Standard)</p>
       </div>
 
       {/* Top layout: form + summary */}
@@ -92,19 +86,9 @@ function CoursesAdmin() {
               <label style={styles.label}>Course Name *</label>
               <input
                 style={styles.input}
-                placeholder="Pre-KG, LKG, UKG..."
+                placeholder="Pre-KG, LKG, UKG, 1st Standard..."
                 value={form.name}
                 onChange={e => setForm({ ...form, name: e.target.value })}
-              />
-            </div>
-            <div style={styles.formField}>
-              <label style={styles.label}>Total Periods / Day *</label>
-              <input
-                type="number"
-                min="1"
-                style={styles.input}
-                value={form.total_periods}
-                onChange={e => setForm({ ...form, total_periods: e.target.value })}
               />
             </div>
           </div>
@@ -119,7 +103,7 @@ function CoursesAdmin() {
           </div>
           <div style={styles.formActions}>
             {editId && (
-              <button style={styles.cancelBtn} onClick={() => { setEditId(null); setForm({ name: "", description: "", total_periods: 4 }); }}>
+              <button style={styles.cancelBtn} onClick={() => { setEditId(null); setForm({ name: "", description: "" }); }}>
                 Cancel
               </button>
             )}
@@ -153,7 +137,6 @@ function CoursesAdmin() {
           <div key={c.id} style={styles.card}>
             <div style={styles.cardHeader}>
               <h3 style={styles.cardTitle}>{c.name}</h3>
-              <span style={styles.periodBadge}>{c.total_periods ?? 4} periods/day</span>
             </div>
             <p style={styles.cardDescription}>{c.description || "No description provided."}</p>
             <div style={styles.actions}>
@@ -329,14 +312,6 @@ const styles = {
     fontSize: 16,
     fontWeight: 600,
     color: "#111827",
-  },
-  periodBadge: {
-    padding: "4px 10px",
-    borderRadius: 999,
-    background: "#eff6ff",
-    color: "#1d4ed8",
-    fontSize: 11,
-    fontWeight: 600,
   },
   cardDescription: {
     margin: "4px 0 0 0",

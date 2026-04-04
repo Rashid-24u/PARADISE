@@ -23,6 +23,7 @@ function Students() {
     email: "",
     dob: "",
     blood_group: "",
+    gender: "",
     parent_name: "",
     parent_phone: "",
     address: "",
@@ -47,7 +48,6 @@ function Students() {
     fetchData();
   }, []);
 
-  // Validation function - ALL FIELDS REQUIRED
   const validateForm = () => {
     const newErrors = {};
     if (!form.name?.trim()) newErrors.name = "Name is required";
@@ -61,6 +61,7 @@ function Students() {
     else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = "Email is invalid";
     if (!form.dob) newErrors.dob = "Date of Birth is required";
     if (!form.blood_group) newErrors.blood_group = "Blood group is required";
+    if (!form.gender) newErrors.gender = "Gender is required";
     if (!form.parent_name?.trim()) newErrors.parent_name = "Parent name is required";
     if (!form.parent_phone?.trim()) newErrors.parent_phone = "Parent phone is required";
     else if (!/^[0-9+\-\s()]{10,15}$/.test(form.parent_phone)) newErrors.parent_phone = "Parent phone number is invalid";
@@ -80,6 +81,7 @@ function Students() {
       email: "",
       dob: "",
       blood_group: "",
+      gender: "",
       parent_name: "",
       parent_phone: "",
       address: "",
@@ -91,7 +93,6 @@ function Students() {
     setShowPassword(false);
   };
 
-  // ADD Student (POST)
   const handleAddStudent = async () => {
     if (!validateForm()) {
       setShowSuccess({ show: true, message: "Please fill all required fields" });
@@ -129,7 +130,6 @@ function Students() {
     }
   };
 
-  // UPDATE Student (PATCH)
   const handleUpdateStudent = async () => {
     if (!validateForm()) {
       setShowSuccess({ show: true, message: "Please fill all required fields" });
@@ -212,6 +212,7 @@ function Students() {
       email: student.email || "",
       dob: student.dob || "",
       blood_group: student.blood_group || "",
+      gender: student.gender || "",
       parent_name: student.parent_name || "",
       parent_phone: student.parent_phone || "",
       address: student.address || "",
@@ -233,7 +234,6 @@ function Students() {
     return course ? course.name : "Unknown";
   };
 
-  // Professional Table Print
   const handlePrintTable = () => {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
@@ -242,47 +242,183 @@ function Students() {
           <title>Students List - Paradise Islamic Pre-School</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Segoe UI', 'Poppins', Arial, sans-serif; padding: 40px; background: white; }
-            .print-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #d4af37; }
-            .print-school-name { font-size: 32px; font-weight: bold; color: #d4af37; letter-spacing: 1px; }
-            .print-school-address { color: #666; font-size: 14px; margin-top: 5px; }
-            .print-school-motto { color: #888; font-size: 12px; margin-top: 5px; font-style: italic; }
-            .print-table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-            .print-table th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; text-align: left; font-weight: 600; }
-            .print-table td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; }
-            .print-footer { margin-top: 30px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
-            .watermark { position: fixed; bottom: 50px; right: 50px; opacity: 0.1; font-size: 60px; pointer-events: none; }
+            body { 
+              font-family: 'Segoe UI', 'Poppins', 'Inter', Arial, sans-serif; 
+              padding: 40px; 
+              background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+              min-height: 100vh;
+            }
+            .print-container {
+              max-width: 1200px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 20px 40px rgba(26, 71, 42, 0.15);
+              overflow: hidden;
+              padding: 30px;
+            }
+            .print-header { 
+              text-align: center; 
+              margin-bottom: 30px; 
+              padding-bottom: 25px; 
+              border-bottom: 3px solid #d4af37;
+              position: relative;
+            }
+            .school-logo {
+              font-size: 48px;
+              margin-bottom: 10px;
+            }
+            .print-school-name { 
+              font-size: 32px; 
+              font-weight: 800; 
+              background: linear-gradient(135deg, #1a472a 0%, #2e5c3a 100%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              letter-spacing: 1px;
+              margin-bottom: 8px;
+            }
+            .print-school-address { 
+              color: #4a5568; 
+              font-size: 13px; 
+              margin-top: 5px;
+              font-weight: 500;
+            }
+            .print-school-motto {
+              color: #d4af37;
+              font-size: 11px;
+              margin-top: 6px;
+              font-style: italic;
+              letter-spacing: 0.5px;
+            }
+            .print-title {
+              font-size: 22px;
+              font-weight: 700;
+              color: #1a472a;
+              margin-top: 20px;
+              margin-bottom: 8px;
+            }
+            .print-meta {
+              margin-top: 8px;
+              font-size: 11px;
+              color: #718096;
+              display: flex;
+              justify-content: center;
+              gap: 20px;
+            }
+            .print-table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin-top: 25px;
+              border-radius: 12px;
+              overflow: hidden;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            }
+            .print-table th { 
+              background: linear-gradient(135deg, #1a472a 0%, #2e5c3a 100%);
+              color: white; 
+              padding: 14px 16px; 
+              text-align: left; 
+              font-weight: 600;
+              font-size: 13px;
+              letter-spacing: 0.5px;
+              border-bottom: 2px solid #d4af37;
+            }
+            .print-table td { 
+              padding: 12px 16px; 
+              border-bottom: 1px solid #e2e8f0;
+              color: #2d3748;
+              font-size: 13px;
+            }
+            .print-table tr:hover {
+              background: #f7fafc;
+            }
+            .print-table tr:last-child td {
+              border-bottom: none;
+            }
+            .print-footer { 
+              margin-top: 30px; 
+              padding-top: 20px;
+              text-align: center; 
+              font-size: 10px; 
+              color: #a0aec0;
+              border-top: 1px solid #e2e8f0;
+            }
+            .print-signature {
+              display: flex;
+              justify-content: space-between;
+              margin-top: 30px;
+              padding-top: 20px;
+            }
+            .signature-line {
+              text-align: center;
+              font-size: 10px;
+              color: #718096;
+            }
+            .signature-line div {
+              margin-top: 30px;
+              width: 200px;
+              border-top: 1px solid #cbd5e0;
+            }
+            @media print {
+              body { background: white; padding: 20px; }
+              .print-container { box-shadow: none; padding: 0; }
+              .print-table th { background: #1a472a; print-color-adjust: exact; }
+            }
           </style>
         </head>
         <body>
-          <div class="print-header">
-            <div class="print-school-name">🏫 PARADISE ISLAMIC PRE-SCHOOL</div>
-            <div class="print-school-address">Pullur, Tirur - 676102 | Quality Education with Islamic Values</div>
-            <div class="print-school-motto">"Empowering Minds, Nurturing Souls"</div>
-            <div style="font-size: 20px; margin-top: 20px; color: #2c3e50;">Students Directory</div>
-            <div style="margin-top: 10px; font-size: 12px; color: #666;">Generated on: ${new Date().toLocaleString()} | Total: ${filtered.length} Students</div>
-          </div>
-          <table class="print-table">
-            <thead>
-              <tr><th>Admission No</th><th>Student Name</th><th>Course</th><th>Phone</th><th>Email</th><th>Parent Name</th> </thead>
-            <tbody>
-              ${filtered.map(s => `
+          <div class="print-container">
+            <div class="print-header">
+              <div class="school-logo">🏫</div>
+              <div class="print-school-name">PARADISE ISLAMIC PRE-SCHOOL</div>
+              <div class="print-school-address">Pullur, Tirur - 676102 | Malappuram, Kerala</div>
+              <div class="print-school-motto">"Quality Education with Islamic Values"</div>
+              <div class="print-title">📋 Students Directory</div>
+              <div class="print-meta">
+                <span>📅 Generated: ${new Date().toLocaleString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                <span>👨‍🎓 Total Students: ${filtered.length}</span>
+              </div>
+            </div>
+            <table class="print-table">
+              <thead>
                 <tr>
-                  <td>${s.admission_no || ""} </td>
-                  <td><strong>${s.name || ""}</strong> </td>
-                  <td>${getCourseName(s.course)} </td>
-                  <td>${s.phone || "-"} </td>
-                  <td>${s.email || "-"} </td>
-                  <td>${s.parent_name || "-"} </td>
-                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
-          <div class="print-footer">
-            <p>This is a computer-generated document. Valid with authorized signature.</p>
-            <p>Paradise Islamic Pre-School | Pullur, Tirur | Ph: +91 1234567890 | www.paradiseschool.edu</p>
+                  <th style="width: 8%">Sl No</th>
+                  <th style="width: 15%">Admission No</th>
+                  <th style="width: 25%">Student Name</th>
+                  <th style="width: 20%">Course</th>
+                  <th style="width: 17%">Phone</th>
+                  <th style="width: 15%">Parent Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filtered.map((s, idx) => `
+                  <tr>
+                    <td style="font-weight: 600;">${idx + 1}</td>
+                    <td><strong>${s.admission_no || ""}</strong></td>
+                    <td>${s.name || ""}</td>
+                    <td>${getCourseName(s.course)}</td>
+                    <td>${s.phone || "-"}</td>
+                    <td>${s.parent_name || "-"}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="print-footer">
+              <p>This is a computer-generated document. Valid with authorized signature.</p>
+              <p>For any queries, please contact the school administration.</p>
+            </div>
+            <div class="print-signature">
+              <div class="signature-line">
+                <div></div>
+                <span>Parent/Guardian Signature</span>
+              </div>
+              <div class="signature-line">
+                <div></div>
+                <span>Principal/Authorized Signatory</span>
+              </div>
+            </div>
           </div>
-          <div class="watermark">📚</div>
         </body>
       </html>
     `);
@@ -290,7 +426,6 @@ function Students() {
     printWindow.print();
   };
 
-  // Professional ID Card Print
   const handlePrintCards = () => {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
@@ -298,55 +433,318 @@ function Students() {
         <head>
           <title>Student ID Cards - Paradise Islamic Pre-School</title>
           <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Segoe UI', 'Poppins', Arial, sans-serif; background: #f0f2f5; padding: 40px; }
-            .cards-container { display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; }
-            .print-id-card { width: 380px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.2); page-break-inside: avoid; margin-bottom: 25px; transition: transform 0.3s; }
-            .card-header-print { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center; color: white; }
-            .card-header-print h3 { font-size: 18px; margin-bottom: 5px; }
-            .card-header-print p { font-size: 11px; opacity: 0.9; }
-            .photo-section-print { text-align: center; margin-top: -40px; position: relative; }
-            .photo-print { width: 100px; height: 100px; border-radius: 50%; background: white; margin: 0 auto; overflow: hidden; border: 4px solid #d4af37; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-            .photo-print img { width: 100%; height: 100%; object-fit: cover; }
-            .card-body-print { padding: 20px; }
-            .student-name-print { text-align: center; font-size: 20px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
-            .student-admission-print { text-align: center; font-size: 12px; color: #667eea; margin-bottom: 15px; }
-            .info-grid-print { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 15px; }
-            .info-item-print { font-size: 11px; display: flex; align-items: center; gap: 6px; }
-            .info-label-print { color: #666; font-weight: 500; min-width: 65px; }
-            .info-value-print { color: #333; font-weight: 500; }
-            .card-footer-print { background: #f8f9fa; padding: 12px; text-align: center; border-top: 1px solid #eee; font-size: 10px; color: #999; }
-            @media print { body { padding: 20px; background: white; } .print-id-card { break-inside: avoid; } }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            
+            @page {
+              size: A4;
+              margin: 8mm;
+            }
+            
+            body {
+              font-family: 'Segoe UI', 'Poppins', 'Inter', Arial, sans-serif;
+              background: white;
+              padding: 0;
+              margin: 0;
+            }
+            
+            .cards-container {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 6mm;
+              justify-content: center;
+              max-width: 210mm;
+              margin: 0 auto;
+            }
+            
+            .id-card {
+              width: 85.6mm;
+              height: 54mm;
+              background: white;
+              overflow: hidden;
+              page-break-inside: avoid;
+              break-inside: avoid;
+              position: relative;
+              margin: 0 auto;
+              border: 2px solid #000000;
+              border-radius: 2mm;
+            }
+            
+            .id-card-inner {
+              position: absolute;
+              top: 1.5mm;
+              left: 1.5mm;
+              right: 1.5mm;
+              bottom: 1.5mm;
+              border: 0.3mm dashed #cccccc;
+              pointer-events: none;
+              border-radius: 1mm;
+            }
+            
+            .card-header {
+              background: linear-gradient(135deg, #1a472a 0%, #2e5c3a 100%);
+              padding: 2.5mm 2mm;
+              text-align: center;
+              border-bottom: 1.5px solid #d4af37;
+            }
+            
+            .card-header h3 {
+              font-size: 3.2mm;
+              font-weight: 700;
+              letter-spacing: 0.3px;
+              color: #d4af37;
+              margin-bottom: 0.5mm;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            
+            .card-header p {
+              font-size: 2mm;
+              color: #e2e8f0;
+              letter-spacing: 0.2px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            
+            .photo-section {
+              text-align: center;
+              margin-top: -3mm;
+              position: relative;
+              z-index: 2;
+            }
+            
+            .photo {
+              width: 10mm;
+              height: 10mm;
+              border-radius: 50%;
+              background: white;
+              margin: 0 auto;
+              overflow: hidden;
+              border: 1.2mm solid #d4af37;
+              box-shadow: 0 0.5mm 1mm rgba(0, 0, 0, 0.1);
+            }
+            
+            .photo img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+            
+            .photo-placeholder {
+              width: 100%;
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 6mm;
+              background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+            }
+            
+            .card-body {
+              padding: 1.5mm 2.5mm 1mm;
+              text-align: center;
+            }
+            
+            .student-name {
+              font-size: 3.8mm;
+              font-weight: 700;
+              color: #1a472a;
+              margin-bottom: 0.5mm;
+              line-height: 1.2;
+              word-break: break-word;
+              max-height: 7mm;
+              overflow: hidden;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+            }
+            
+            .student-admission {
+              font-size: 2.2mm;
+              color: #2e5c3a;
+              margin-bottom: 1mm;
+              font-weight: 500;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            
+            .info-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 0.8mm;
+              margin-top: 1mm;
+              border-top: 0.3px dashed #cbd5e0;
+              padding-top: 1mm;
+              text-align: left;
+            }
+            
+            .info-item {
+              display: flex;
+              align-items: center;
+              gap: 0.8mm;
+              font-size: 2mm;
+              color: #4a5568;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            
+            .info-icon {
+              font-size: 2.2mm;
+              min-width: 3.5mm;
+            }
+            
+            .info-label {
+              font-weight: 600;
+              color: #1a472a;
+              margin-right: 0.3mm;
+              font-size: 2mm;
+            }
+            
+            .info-value {
+              color: #2d3748;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            
+            .card-footer {
+              background: #f7fafc;
+              padding: 0.8mm;
+              text-align: center;
+              border-top: 0.3px solid #e2e8f0;
+              font-size: 1.8mm;
+              color: #718096;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            
+            .valid-badge {
+              display: inline-block;
+              background: #d4af37;
+              color: #1a472a;
+              padding: 0.2mm 1.5mm;
+              border-radius: 1.5mm;
+              font-size: 1.8mm;
+              font-weight: 700;
+              margin-top: 0.8mm;
+            }
+            
+            @media print {
+              body {
+                background: white;
+                margin: 0;
+                padding: 0;
+                zoom: 100%;
+              }
+              
+              .cards-container {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 5mm;
+                page-break-inside: avoid;
+                margin: 0;
+              }
+              
+              .id-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                box-shadow: none;
+                border: 1.5px solid #000000;
+                border-radius: 2mm;
+              }
+              
+              .id-card-inner {
+                border: 0.3mm dashed #aaaaaa;
+              }
+              
+              .card-header {
+                background: #1a472a;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+              }
+              
+              .valid-badge {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+              }
+              
+              .photo-placeholder {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+              }
+            }
+            
+            @media screen {
+              .cards-container {
+                gap: 8mm;
+              }
+            }
+            
+            @media screen and (max-width: 700px) {
+              .cards-container {
+                grid-template-columns: 1fr;
+                gap: 10mm;
+              }
+              .id-card {
+                transform: scale(0.98);
+              }
+            }
           </style>
         </head>
         <body>
           <div class="cards-container">
             ${filtered.map(s => `
-              <div class="print-id-card">
-                <div class="card-header-print">
+              <div class="id-card">
+                <div class="id-card-inner"></div>
+                <div class="card-header">
                   <h3>🏫 PARADISE ISLAMIC PRE-SCHOOL</h3>
                   <p>STUDENT IDENTIFICATION CARD</p>
                 </div>
-                <div class="photo-section-print">
-                  <div class="photo-print">
-                    ${s.image_url ? `<img src="${s.image_url}" />` : '<div style="display:flex; align-items:center; justify-content:center; height:100%; font-size:45px;">👨‍🎓</div>'}
+                <div class="photo-section">
+                  <div class="photo">
+                    ${s.image_url ? 
+                      `<img src="${s.image_url}" alt="${s.name}" />` : 
+                      `<div class="photo-placeholder">👨‍🎓</div>`
+                    }
                   </div>
                 </div>
-                <div class="card-body-print">
-                  <div class="student-name-print">${s.name || ""}</div>
-                  <div class="student-admission-print">Admission No: ${s.admission_no || ""}</div>
-                  <div class="info-grid-print">
-                    <div class="info-item-print"><span class="info-label-print">📚 Course:</span><span class="info-value-print">${getCourseName(s.course)}</span></div>
-                    <div class="info-item-print"><span class="info-label-print">🎂 DOB:</span><span class="info-value-print">${s.dob || "-"}</span></div>
-                    <div class="info-item-print"><span class="info-label-print">🩸 Blood:</span><span class="info-value-print">${s.blood_group || "-"}</span></div>
-                    <div class="info-item-print"><span class="info-label-print">📞 Phone:</span><span class="info-value-print">${s.phone || "-"}</span></div>
-                    <div class="info-item-print"><span class="info-label-print">👨‍👩‍👧 Parent:</span><span class="info-value-print">${s.parent_name || "-"}</span></div>
-                    <div class="info-item-print"><span class="info-label-print">📧 Email:</span><span class="info-value-print">${s.email || "-"}</span></div>
+                <div class="card-body">
+                  <div class="student-name">${s.name || ""}</div>
+                  <div class="student-admission">ID: ${s.admission_no || ""}</div>
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <span class="info-icon">📚</span>
+                      <span class="info-label">Course:</span>
+                      <span class="info-value">${getCourseName(s.course)}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-icon">🩸</span>
+                      <span class="info-label">Blood:</span>
+                      <span class="info-value">${s.blood_group || "N/A"}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-icon">📞</span>
+                      <span class="info-label">Phone:</span>
+                      <span class="info-value">${s.phone || "N/A"}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-icon">👨‍👩</span>
+                      <span class="info-label">Parent:</span>
+                      <span class="info-value">${s.parent_name?.split(' ')[0] || "N/A"}</span>
+                    </div>
                   </div>
+                  <div class="valid-badge">✓ VALID FOR ACADEMIC YEAR</div>
                 </div>
-                <div class="card-footer-print">
-                  <div>Pullur, Tirur - 676102 | Valid for Academic Year</div>
-                  <div>Authorized Signature: _________________</div>
+                <div class="card-footer">
+                  Pullur, Tirur - 676102
                 </div>
               </div>
             `).join('')}
@@ -359,625 +757,1090 @@ function Students() {
   };
 
   const bloodGroups = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
-
-  const containerStyle = {
-    padding: "20px",
-    background: "linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)",
-    minHeight: "calc(100vh - 70px)",
-    boxSizing: "border-box"
-  };
+  const genders = ["Male", "Female", "Other"];
 
   return (
-    <div style={containerStyle}>
+    <div style={styles.container}>
       {/* School Header */}
-      <div style={{
-        textAlign: "center",
-        marginBottom: "30px",
-        padding: "25px",
-        background: "linear-gradient(135deg, #1a472a 0%, #2e5c3a 100%)",
-        borderRadius: "20px",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-        border: "1px solid #d4af37"
-      }}>
-        <h1 style={{
-          fontSize: "clamp(24px, 5vw, 36px)",
-          fontWeight: "bold",
-          color: "#d4af37",
-          textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-          letterSpacing: "1px",
-          margin: 0
-        }}>🏫 PARADISE ISLAMIC PRE-SCHOOL</h1>
-        <p style={{
-          color: "#f0f0f0",
-          fontSize: "clamp(12px, 3vw, 14px)",
-          marginTop: "10px",
-          opacity: 0.9
-        }}>Pullur, Tirur - 676102 | Quality Education with Islamic Values</p>
+      <div style={styles.schoolHeader}>
+        <h1 style={styles.schoolName}>🏫 PARADISE ISLAMIC PRE-SCHOOL</h1>
+        <p style={styles.schoolAddress}>Pullur, Tirur - 676102 | Quality Education with Islamic Values</p>
       </div>
 
-      {/* Success Message */}
+      {/* Success Toast */}
       {showSuccess.show && (
-        <div style={{
-          position: "fixed", top: "20px", right: "20px", background: "#28a745", color: "white",
-          padding: "12px 20px", borderRadius: "8px", zIndex: 1001, boxShadow: "0 5px 15px rgba(0,0,0,0.2)", display: "flex", alignItems: "center", gap: "10px"
-        }}>
+        <div style={styles.toast}>
           <span>{showSuccess.message}</span>
           {lastSaved && (
-            <button
-              style={{ padding: "6px 10px", background: "#1d4ed8", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "12px" }}
-              onClick={() => setSelected(lastSaved)}
-            >
-              View
-            </button>
+            <button style={styles.toastBtn} onClick={() => setSelected(lastSaved)}>View</button>
           )}
         </div>
       )}
 
       {/* Confirm Dialog */}
       {showConfirm.show && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)",
-          display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000, padding: "20px"
-        }}>
-          <div style={{ background: "white", borderRadius: "15px", padding: "25px", width: "400px", maxWidth: "90vw" }}>
-            <h3 style={{ margin: "0 0 10px 0", color: "#dc3545" }}>Confirm Action</h3>
-            <p>{showConfirm.message}</p>
-            <div style={{ display: "flex", gap: "10px", marginTop: "20px", justifyContent: "flex-end" }}>
-              <button style={{ padding: "8px 16px", background: "#6c757d", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
-                onClick={() => setShowConfirm({ show: false, message: "", type: "", onConfirm: null })}>Cancel</button>
-              <button style={{ padding: "8px 16px", background: "#28a745", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
-                onClick={showConfirm.onConfirm}>Confirm</button>
+        <div style={styles.modalOverlay}>
+          <div style={styles.confirmDialog}>
+            <h3 style={styles.confirmTitle}>Confirm Action</h3>
+            <p style={styles.confirmMessage}>{showConfirm.message}</p>
+            <div style={styles.confirmActions}>
+              <button style={styles.cancelBtn} onClick={() => setShowConfirm({ show: false, message: "", type: "", onConfirm: null })}>Cancel</button>
+              <button style={styles.confirmBtn} onClick={showConfirm.onConfirm}>Confirm</button>
             </div>
           </div>
         </div>
       )}
 
       {/* Back Button */}
-      <button style={{
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white", border: "none",
-        padding: "10px 20px", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: "bold", marginBottom: "20px"
-      }} onClick={() => window.location.href = "/admin-dashboard"}>
+      <button style={styles.backBtn} onClick={() => window.location.href = "/admin-dashboard"}>
         ← Back to Dashboard
       </button>
 
-      {/* Premium Form */}
-      <div style={{ background: "white", borderRadius: "20px", padding: "clamp(20px, 4vw, 30px)", boxShadow: "0 20px 40px rgba(0,0,0,0.1)", marginBottom: "30px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px", borderBottom: "2px solid #e0e0e0", paddingBottom: "15px", flexWrap: "wrap", gap: "10px" }}>
-          <h3 style={{ margin: 0, color: "#333", fontSize: "clamp(18px, 4vw, 24px)" }}>{editingStudent ? "✏️ Edit Student" : "➕ Add New Student"}</h3>
-          {editingStudent && <button style={{ background: "#6c757d", color: "white", border: "none", padding: "8px 16px", borderRadius: "6px", cursor: "pointer" }} onClick={resetForm}>Cancel Edit</button>}
+      {/* Form Section */}
+      <div style={styles.formCard}>
+        <div style={styles.formHeader}>
+          <h3 style={styles.formTitle}>{editingStudent ? "✏️ Edit Student" : "➕ Add New Student"}</h3>
+          {editingStudent && <button style={styles.cancelEditBtn} onClick={resetForm}>Cancel Edit</button>}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+        
+        {/* Login Credentials Section - HIGHLIGHTED */}
+        <div style={styles.loginCredentialsSection}>
+          <div style={styles.loginSectionHeader}>
+            <span style={styles.loginIcon}>🔐</span>
+            <h4 style={styles.loginSectionTitle}>Student Login Credentials</h4>
+            <span style={styles.loginBadge}>Important for student access</span>
+          </div>
+          <div style={styles.loginCredentialsGrid}>
+            <div style={styles.highlightField}>
+              <label style={styles.highlightLabel}>
+                <span style={styles.labelIcon}>🎫</span> Admission Number *
+              </label>
+              <input 
+                type="text" 
+                style={{...styles.highlightInput, borderColor: errors.admission_no ? "#dc3545" : "#d4af37"}}
+                placeholder="Enter admission number (used for login)"
+                value={form.admission_no} 
+                onChange={e => setForm({ ...form, admission_no: e.target.value })} 
+              />
+              {errors.admission_no && <span style={styles.errorText}>{errors.admission_no}</span>}
+              <small style={styles.highlightHint}>📌 Student will use this to login</small>
+            </div>
+            
+            <div style={styles.highlightField}>
+              <label style={styles.highlightLabel}>
+                <span style={styles.labelIcon}>🔑</span> Password {!editingStudent && "*"}
+              </label>
+              <div style={styles.passwordWrapper}>
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  style={{...styles.highlightInput, paddingRight: "40px", borderColor: errors.password ? "#dc3545" : "#d4af37"}}
+                  placeholder={editingStudent ? "Leave blank to keep current" : "Enter password (used for login)"} 
+                  value={form.password} 
+                  onChange={e => setForm({ ...form, password: e.target.value })} 
+                />
+                <button type="button" style={styles.passwordToggle} onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? "👁️" : "👁️‍🗨️"}
+                </button>
+              </div>
+              {errors.password && <span style={styles.errorText}>{errors.password}</span>}
+              <small style={styles.highlightHint}>🔒 Minimum 4 characters - Student will use this to login</small>
+            </div>
+          </div>
+        </div>
+
+        {/* Personal Information Section */}
+        <div style={styles.sectionDivider}>
+          <span style={styles.sectionDividerIcon}>👤</span>
+          <span style={styles.sectionDividerText}>Personal Information</span>
+        </div>
+
+        <div style={styles.formGrid}>
           {[
-            { label: "Full Name *", name: "name", type: "text", placeholder: "Enter student name" },
-            { label: "Admission No *", name: "admission_no", type: "text", placeholder: "Enter admission number" },
-            { label: "Phone Number *", name: "phone", type: "text", placeholder: "Enter phone number" },
-            { label: "Email Address *", name: "email", type: "email", placeholder: "Enter email address" },
-            { label: "Parent Name *", name: "parent_name", type: "text", placeholder: "Enter parent/guardian name" },
-            { label: "Parent Phone *", name: "parent_phone", type: "text", placeholder: "Enter parent phone number" }
+            { label: "Full Name", name: "name", type: "text", placeholder: "Enter student name" },
+            { label: "Phone Number", name: "phone", type: "text", placeholder: "Enter phone number" },
+            { label: "Email Address", name: "email", type: "email", placeholder: "Enter email address" },
           ].map(field => (
-            <div key={field.name} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <label style={{ fontWeight: "600", color: "#555", fontSize: "14px" }}>{field.label}</label>
-              <input type={field.type} style={{ padding: "12px", border: `1px solid ${errors[field.name] ? "#dc3545" : "#ddd"}`, borderRadius: "8px", fontSize: "14px", outline: "none" }}
+            <div key={field.name} style={styles.formField}>
+              <label style={styles.formLabel}>{field.label} *</label>
+              <input type={field.type} style={{...styles.formInput, borderColor: errors[field.name] ? "#dc3545" : "#e2e8f0" }}
                 placeholder={field.placeholder} value={form[field.name]} onChange={e => setForm({ ...form, [field.name]: e.target.value })} />
-              {errors[field.name] && <span style={{ color: "#dc3545", fontSize: "12px" }}>{errors[field.name]}</span>}
+              {errors[field.name] && <span style={styles.errorText}>{errors[field.name]}</span>}
             </div>
           ))}
           
-          {/* Password Field with Show/Hide Toggle */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontWeight: "600", color: "#555", fontSize: "14px" }}>Password {!editingStudent && "*"}</label>
-            <div style={{ display: "flex", position: "relative" }}>
-              <input 
-                type={showPassword ? "text" : "password"} 
-                style={{ 
-                  padding: "12px", 
-                  border: `1px solid ${errors.password ? "#dc3545" : "#ddd"}`, 
-                  borderRadius: "8px", 
-                  fontSize: "14px", 
-                  outline: "none",
-                  flex: 1,
-                  paddingRight: "40px"
-                }}
-                placeholder={editingStudent ? "Leave blank to keep current" : "Enter password"} 
-                value={form.password}
-                onChange={e => setForm({ ...form, password: e.target.value })} 
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "18px",
-                  padding: "4px",
-                  color: "#666"
-                }}
-              >
-                {showPassword ? "👁️" : "👁️‍🗨️"}
-              </button>
-            </div>
-            {errors.password && <span style={{ color: "#dc3545", fontSize: "12px" }}>{errors.password}</span>}
-          </div>
-          
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontWeight: "600", color: "#555", fontSize: "14px" }}>Course *</label>
-            <select style={{ padding: "12px", border: `1px solid ${errors.course ? "#dc3545" : "#ddd"}`, borderRadius: "8px", fontSize: "14px", backgroundColor: "white" }}
+          {/* Course Field */}
+          <div style={styles.formField}>
+            <label style={styles.formLabel}>Course *</label>
+            <select style={{...styles.formSelect, borderColor: errors.course ? "#dc3545" : "#e2e8f0" }}
               value={form.course || ""} onChange={e => setForm({ ...form, course: e.target.value })}>
               <option value="">Select Course</option>
               {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
-            {errors.course && <span style={{ color: "#dc3545", fontSize: "12px" }}>{errors.course}</span>}
+            {errors.course && <span style={styles.errorText}>{errors.course}</span>}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontWeight: "600", color: "#555", fontSize: "14px" }}>Date of Birth *</label>
-            <input type="date" style={{ padding: "12px", border: `1px solid ${errors.dob ? "#dc3545" : "#ddd"}`, borderRadius: "8px", fontSize: "14px" }}
+          {/* Date of Birth Field */}
+          <div style={styles.formField}>
+            <label style={styles.formLabel}>Date of Birth *</label>
+            <input type="date" style={{...styles.formInput, borderColor: errors.dob ? "#dc3545" : "#e2e8f0" }}
               value={form.dob} onChange={e => setForm({ ...form, dob: e.target.value })} />
-            {errors.dob && <span style={{ color: "#dc3545", fontSize: "12px" }}>{errors.dob}</span>}
+            {errors.dob && <span style={styles.errorText}>{errors.dob}</span>}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontWeight: "600", color: "#555", fontSize: "14px" }}>Blood Group *</label>
-            <select style={{ padding: "12px", border: `1px solid ${errors.blood_group ? "#dc3545" : "#ddd"}`, borderRadius: "8px", fontSize: "14px", backgroundColor: "white" }}
+          {/* Blood Group Field */}
+          <div style={styles.formField}>
+            <label style={styles.formLabel}>Blood Group *</label>
+            <select style={{...styles.formSelect, borderColor: errors.blood_group ? "#dc3545" : "#e2e8f0" }}
               value={form.blood_group} onChange={e => setForm({ ...form, blood_group: e.target.value })}>
               <option value="">Select Blood Group</option>
               {bloodGroups.map(bg => <option key={bg} value={bg}>{bg}</option>)}
             </select>
-            {errors.blood_group && <span style={{ color: "#dc3545", fontSize: "12px" }}>{errors.blood_group}</span>}
+            {errors.blood_group && <span style={styles.errorText}>{errors.blood_group}</span>}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontWeight: "600", color: "#555", fontSize: "14px" }}>Address *</label>
-            <textarea style={{ padding: "12px", border: `1px solid ${errors.address ? "#dc3545" : "#ddd"}`, borderRadius: "8px", fontSize: "14px", resize: "vertical" }}
+          {/* Gender Field */}
+          <div style={styles.formField}>
+            <label style={styles.formLabel}>Gender *</label>
+            <select style={{...styles.formSelect, borderColor: errors.gender ? "#dc3545" : "#e2e8f0" }}
+              value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })}>
+              <option value="">Select Gender</option>
+              {genders.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
+            {errors.gender && <span style={styles.errorText}>{errors.gender}</span>}
+          </div>
+
+          {/* Address Field */}
+          <div style={styles.formFieldFull}>
+            <label style={styles.formLabel}>Address *</label>
+            <textarea style={{...styles.formTextarea, borderColor: errors.address ? "#dc3545" : "#e2e8f0" }}
               rows="2" placeholder="Enter address" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
-            {errors.address && <span style={{ color: "#dc3545", fontSize: "12px" }}>{errors.address}</span>}
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontWeight: "600", color: "#555", fontSize: "14px" }}>Student Photo</label>
-            <input type="file" style={{ padding: "10px", border: "1px solid #ddd", borderRadius: "8px" }}
-              onChange={e => setForm({ ...form, image: e.target.files[0] })} />
-          </div>
-
-          <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontWeight: "600", color: "#555", fontSize: "14px" }}>Additional Details</label>
-            <textarea style={{ padding: "12px", border: "1px solid #ddd", borderRadius: "8px", fontSize: "14px", resize: "vertical" }}
-              rows="3" placeholder="Enter any additional information..." value={form.details} onChange={e => setForm({ ...form, details: e.target.value })} />
+            {errors.address && <span style={styles.errorText}>{errors.address}</span>}
           </div>
         </div>
-        <button style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white", border: "none", padding: "14px 28px", borderRadius: "10px", fontSize: "16px", fontWeight: "bold", cursor: "pointer", marginTop: "25px", width: "100%" }}
-          onClick={handleSubmit}>{editingStudent ? "✏️ Update Student" : "➕ Add Student"}</button>
+
+        {/* Parent Information Section */}
+        <div style={styles.sectionDivider}>
+          <span style={styles.sectionDividerIcon}>👨‍👩‍👧</span>
+          <span style={styles.sectionDividerText}>Parent / Guardian Information</span>
+        </div>
+
+        <div style={styles.formGrid}>
+          {[
+            { label: "Parent Name", name: "parent_name", type: "text", placeholder: "Enter parent/guardian name" },
+            { label: "Parent Phone", name: "parent_phone", type: "text", placeholder: "Enter parent phone number" },
+          ].map(field => (
+            <div key={field.name} style={styles.formField}>
+              <label style={styles.formLabel}>{field.label} *</label>
+              <input type={field.type} style={{...styles.formInput, borderColor: errors[field.name] ? "#dc3545" : "#e2e8f0" }}
+                placeholder={field.placeholder} value={form[field.name]} onChange={e => setForm({ ...form, [field.name]: e.target.value })} />
+              {errors[field.name] && <span style={styles.errorText}>{errors[field.name]}</span>}
+            </div>
+          ))}
+        </div>
+
+        {/* Additional Information Section */}
+        <div style={styles.sectionDivider}>
+          <span style={styles.sectionDividerIcon}>📎</span>
+          <span style={styles.sectionDividerText}>Additional Information</span>
+        </div>
+
+        <div style={styles.formGrid}>
+          {/* Student Photo Field */}
+          <div style={styles.formField}>
+            <label style={styles.formLabel}>Student Photo</label>
+            <input type="file" style={styles.formFile} onChange={e => setForm({ ...form, image: e.target.files[0] })} />
+          </div>
+
+          {/* Additional Details Field */}
+          <div style={styles.formFieldFull}>
+            <label style={styles.formLabel}>Additional Details</label>
+            <textarea style={styles.formTextarea} rows="3" placeholder="Enter any additional information..." 
+              value={form.details} onChange={e => setForm({ ...form, details: e.target.value })} />
+          </div>
+        </div>
+        
+        <button style={styles.submitBtn} onClick={handleSubmit}>
+          {editingStudent ? "✏️ Update Student" : "➕ Add Student"}
+        </button>
       </div>
 
       {/* Filters */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px", marginBottom: "20px" }}>
-        <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", flex: "1" }}>
-          <div style={{ display: "flex", alignItems: "center", background: "white", borderRadius: "10px", padding: "5px 15px", boxShadow: "0 2px 5px rgba(0,0,0,0.1)", flex: "1", minWidth: "200px" }}>
-            <span style={{ fontSize: "18px", marginRight: "8px" }}>🔍</span>
-            <input style={{ padding: "10px", border: "none", outline: "none", fontSize: "14px", width: "100%" }}
-              placeholder="Search by name..." value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-          <select style={{ padding: "10px 15px", border: "1px solid #ddd", borderRadius: "10px", fontSize: "14px", background: "white" }}
-            value={filterCourse || ""} onChange={e => setFilterCourse(e.target.value)}>
-            <option value="">All Classes</option>
-            {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+      <div style={styles.filterBar}>
+        <div style={styles.searchWrapper}>
+          <span style={styles.searchIcon}>🔍</span>
+          <input style={styles.searchInput} placeholder="Search by name..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <button style={{ padding: "10px 20px", border: "none", borderRadius: "8px", color: "white", cursor: "pointer", fontWeight: "bold", backgroundColor: "#17a2b8" }}
-            onClick={handlePrintTable}>🖨️ Print Table</button>
-          <button style={{ padding: "10px 20px", border: "none", borderRadius: "8px", color: "#2c3e50", cursor: "pointer", fontWeight: "bold", backgroundColor: "#d4af37" }}
-            onClick={handlePrintCards}>🪪 Print ID Cards</button>
-          <button style={{ padding: "10px 20px", border: "none", borderRadius: "8px", color: "white", cursor: "pointer", fontWeight: "bold", backgroundColor: viewMode === "table" ? "#667eea" : "#6c757d" }}
-            onClick={() => setViewMode("table")}>📋 Table</button>
-          <button style={{ padding: "10px 20px", border: "none", borderRadius: "8px", color: "white", cursor: "pointer", fontWeight: "bold", backgroundColor: viewMode === "card" ? "#667eea" : "#6c757d" }}
-            onClick={() => setViewMode("card")}>🃏 Cards</button>
+        <select style={styles.filterSelect} value={filterCourse || ""} onChange={e => setFilterCourse(e.target.value)}>
+          <option value="">All Classes</option>
+          {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        <div style={styles.actionGroup}>
+          <button style={styles.actionBtn} onClick={handlePrintTable}>🖨️ Print Table</button>
+          <button style={styles.actionBtnGold} onClick={handlePrintCards}>🪪 Print ID Cards</button>
+          <button style={{...styles.viewToggle, ...(viewMode === "table" ? styles.viewToggleActive : {})}} onClick={() => setViewMode("table")}>📋 Table</button>
+          <button style={{...styles.viewToggle, ...(viewMode === "card" ? styles.viewToggleActive : {})}} onClick={() => setViewMode("card")}>🃏 Cards</button>
         </div>
       </div>
 
       {/* Total Count */}
-      <div style={{ background: "white", padding: "12px 20px", borderRadius: "10px", marginBottom: "20px", fontSize: "clamp(14px, 4vw, 16px)", fontWeight: "500", boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }}>
+      <div style={styles.totalCount}>
         👨‍🎓 Total Students: <strong>{filtered.length}</strong> {filterCourse && `(Filtered by: ${getCourseName(filterCourse)})`}
       </div>
 
-      {/* Table View - Removed extra View button */}
+      {/* Table View */}
       {viewMode === "table" && (
-        <div style={{ background: "white", borderRadius: "15px", boxShadow: "0 5px 15px rgba(0,0,0,0.1)", overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "700px" }}>
-              <thead>
-                <tr style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white" }}>
-                  <th style={{ padding: "15px", textAlign: "left" }}>Admission No</th>
-                  <th style={{ padding: "15px", textAlign: "left" }}>Photo</th>
-                  <th style={{ padding: "15px", textAlign: "left" }}>Name</th>
-                  <th style={{ padding: "15px", textAlign: "left" }}>Course</th>
-                  <th style={{ padding: "15px", textAlign: "left" }}>Phone</th>
-                  <th style={{ padding: "15px", textAlign: "left" }}>Email</th>
-                  <th style={{ padding: "15px", textAlign: "left" }}>Parent</th>
-                  <th style={{ padding: "15px", textAlign: "left" }}>Actions</th>
-                 </tr>
-              </thead>
-              <tbody>
-                {filtered.map(s => (
-                  <tr key={s.id} style={{ cursor: "pointer" }} onClick={() => setSelected(s)}>
-                    <td style={{ padding: "12px 15px", borderBottom: "1px solid #f0f0f0" }}><strong>{s.admission_no}</strong></td>
-                    <td style={{ padding: "12px 15px", borderBottom: "1px solid #f0f0f0" }}>
-                      {s.image_url ? 
-                        <img src={s.image_url} style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover", objectPosition: "center top" }} /> :
-                        <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "#e0e0e0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>👨‍🎓</div>
-                      }
-                    </td>
-                    <td style={{ padding: "12px 15px", borderBottom: "1px solid #f0f0f0" }}>{s.name}</td>
-                    <td style={{ padding: "12px 15px", borderBottom: "1px solid #f0f0f0" }}>
-                      <span style={{ background: "#e8f0fe", color: "#667eea", padding: "4px 10px", borderRadius: "20px", fontSize: "12px" }}>{getCourseName(s.course)}</span>
-                    </td>
-                    <td style={{ padding: "12px 15px", borderBottom: "1px solid #f0f0f0" }}>{s.phone || "-"}</td>
-                    <td style={{ padding: "12px 15px", borderBottom: "1px solid #f0f0f0" }}>{s.email || "-"}</td>
-                    <td style={{ padding: "12px 15px", borderBottom: "1px solid #f0f0f0" }}>{s.parent_name || "-"}</td>
-                    <td style={{ padding: "12px 15px", borderBottom: "1px solid #f0f0f0" }}>
-                      <button style={{ background: "#28a745", color: "white", border: "none", padding: "6px 10px", borderRadius: "5px", cursor: "pointer", marginRight: "5px" }}
-                        onClick={(e) => { e.stopPropagation(); handleEdit(s); }}>✏️</button>
-                      <button style={{ background: "#dc3545", color: "white", border: "none", padding: "6px 10px", borderRadius: "5px", cursor: "pointer" }}
-                        onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}>🗑️</button>
-                    </td>
-                  </tr>
-                ))}
-                {filtered.length === 0 && (
-                  <tr><td colSpan="8" style={{ textAlign: "center", padding: "40px", color: "#999" }}>No students found</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div style={styles.tableWrapper}>
+          <table style={styles.table}>
+            <thead>
+              <tr style={styles.tableHeader}>
+                <th style={styles.th}>Sl No</th>
+                <th style={styles.th}>Admission No</th>
+                <th style={styles.th}>Photo</th>
+                <th style={styles.th}>Name</th>
+                <th style={styles.th}>Course</th>
+                <th style={styles.th}>Phone</th>
+                <th style={styles.th}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((s, idx) => (
+                <tr key={s.id} style={styles.tableRow} onClick={() => setSelected(s)}>
+                  <td style={styles.td}>{idx + 1}</td>
+                  <td style={styles.td}><strong>{s.admission_no}</strong></td>
+                  <td style={styles.td}>
+                    {s.image_url ? 
+                      <img src={s.image_url} style={styles.tableAvatar} alt={s.name} /> :
+                      <div style={styles.tableAvatarPlaceholder}>👨‍🎓</div>
+                    }
+                  </td>
+                  <td style={styles.td}>{s.name}</td>
+                  <td style={styles.td}>
+                    <span style={styles.courseBadge}>{getCourseName(s.course)}</span>
+                  </td>
+                  <td style={styles.td}>{s.phone || "-"}</td>
+                  <td style={styles.td}>
+                    <button style={styles.editBtn} onClick={(e) => { e.stopPropagation(); handleEdit(s); }}>✏️</button>
+                    <button style={styles.deleteBtn} onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}>🗑️</button>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr><td colSpan="7" style={styles.emptyRow}>No students found</td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Card View - Removed extra View button */}
+      {/* Card View */}
       {viewMode === "card" && (
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-          gap: "24px",
-          marginTop: "20px"
-        }}>
+        <div style={styles.cardGrid}>
           {filtered.map(s => (
-            <div key={s.id} style={{
-              background: "white",
-              borderRadius: "20px",
-              overflow: "hidden",
-              boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
-              transition: "all 0.3s ease",
-              cursor: "pointer"
-            }} onClick={() => setSelected(s)}>
-              {/* School Name Banner */}
-              <div style={{
-                background: "linear-gradient(135deg, #d4af37 0%, #f5b042 100%)",
-                padding: "8px 12px",
-                textAlign: "center"
-              }}>
-                <span style={{
-                  fontSize: "11px",
-                  fontWeight: "bold",
-                  color: "#1a472a",
-                  letterSpacing: "0.5px",
-                  display: "block"
-                }}>🏫 PARADISE ISLAMIC PRE-SCHOOL</span>
-              </div>
-              
-              {/* Image Section */}
-              <div style={{
-                height: "200px",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                overflow: "hidden"
-              }}>
-                {s.image_url ? (
-                  <img src={s.image_url} style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    objectPosition: "center top"
-                  }} alt={s.name} />
-                ) : (
-                  <div style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "70px",
-                    color: "rgba(255,255,255,0.9)"
-                  }}>👨‍🎓</div>
-                )}
-              </div>
-              
-              {/* Content Section */}
-              <div style={{ padding: "18px" }}>
-                <h3 style={{
-                  margin: "0 0 6px 0",
-                  fontSize: "19px",
-                  color: "#1a472a",
-                  fontWeight: "bold",
-                  textAlign: "center"
-                }}>{s.name}</h3>
-                <p style={{
-                  color: "#667eea",
-                  fontSize: "12px",
-                  marginBottom: "8px",
-                  textAlign: "center"
-                }}>#{s.admission_no}</p>
-                <div style={{ textAlign: "center", marginBottom: "15px" }}>
-                  <span style={{
-                    display: "inline-block",
-                    background: "#e8f0fe",
-                    color: "#667eea",
-                    padding: "5px 14px",
-                    borderRadius: "25px",
-                    fontSize: "12px",
-                    fontWeight: "500"
-                  }}>{getCourseName(s.course)}</span>
-                </div>
-                
-                {/* Quick Info */}
-                <div style={{
-                  marginTop: "12px",
-                  borderTop: "1px solid #eee",
-                  paddingTop: "12px"
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", fontSize: "12px", color: "#666" }}>
-                    <span>📞</span> <span>{s.phone || "No phone"}</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", fontSize: "12px", color: "#666" }}>
-                    <span>👨‍👩‍👧</span> <span>{s.parent_name || "No parent"}</span>
-                  </div>
-                  {s.blood_group && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#666" }}>
-                      <span>🩸</span> <span>{s.blood_group}</span>
-                    </div>
+            <div key={s.id} style={styles.studentCard} onClick={() => setSelected(s)}>
+              <div style={styles.cardHeader}>
+                <div style={styles.cardPhoto}>
+                  {s.image_url ? (
+                    <img src={s.image_url} style={styles.cardAvatar} alt={s.name} />
+                  ) : (
+                    <div style={styles.cardAvatarPlaceholder}>👨‍🎓</div>
                   )}
                 </div>
-                
-                {/* Buttons */}
-                <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
-                  <button style={{
-                    flex: 1,
-                    background: "#28a745",
-                    color: "white",
-                    border: "none",
-                    padding: "10px",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    fontWeight: "500"
-                  }} onClick={(e) => { e.stopPropagation(); handleEdit(s); }}>✏️ Edit</button>
-                  <button style={{
-                    flex: 1,
-                    background: "#dc3545",
-                    color: "white",
-                    border: "none",
-                    padding: "10px",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    fontWeight: "500"
-                  }} onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}>🗑️ Delete</button>
+                <div style={styles.cardInfo}>
+                  <h3 style={styles.cardName}>{s.name}</h3>
+                  <p style={styles.cardAdmission}>Admission No: {s.admission_no}</p>
+                  <span style={styles.cardCourse}>{getCourseName(s.course)}</span>
                 </div>
+              </div>
+              <div style={styles.cardDetails}>
+                <div style={styles.cardDetailItem}>
+                  <span>📞</span> {s.phone || "No phone"}
+                </div>
+                <div style={styles.cardDetailItem}>
+                  <span>👨‍👩‍👧</span> {s.parent_name || "No parent"}
+                </div>
+                {s.blood_group && (
+                  <div style={styles.cardDetailItem}>
+                    <span>🩸</span> {s.blood_group}
+                  </div>
+                )}
+                {s.gender && (
+                  <div style={styles.cardDetailItem}>
+                    <span>⚥</span> {s.gender}
+                  </div>
+                )}
+              </div>
+              <div style={styles.cardActions}>
+                <button style={styles.cardEditBtn} onClick={(e) => { e.stopPropagation(); handleEdit(s); }}>✏️ Edit</button>
+                <button style={styles.cardDeleteBtn} onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}>🗑️ Delete</button>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Full Details Modal - Professional Redesign */}
+      {/* Student Detail Modal */}
       {selected && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "rgba(0,0,0,0.85)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 9999,
-          padding: "20px",
-          overflowY: "auto"
-        }} onClick={() => setSelected(null)}>
-          <div style={{
-            position: "relative",
-            maxWidth: "900px",
-            width: "100%",
-            maxHeight: "90vh",
-            overflowY: "auto",
-            background: "white",
-            borderRadius: "28px",
-            boxShadow: "0 30px 60px rgba(0,0,0,0.4)",
-            animation: "modalSlideUp 0.3s ease"
-          }} onClick={(e) => e.stopPropagation()}>
-            {/* Header with Profile */}
-            <div style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              padding: "35px 30px",
-              position: "relative",
-              textAlign: "center"
-            }}>
-              <div style={{
-                position: "absolute",
-                top: "20px",
-                right: "20px"
-              }}>
-                <button style={{
-                  background: "rgba(255,255,255,0.2)",
-                  color: "white",
-                  border: "none",
-                  width: "36px",
-                  height: "36px",
-                  borderRadius: "50%",
-                  cursor: "pointer",
-                  fontSize: "18px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backdropFilter: "blur(10px)"
-                }} onClick={() => setSelected(null)}>✖</button>
-              </div>
-              
-              <div style={{
-                width: "120px",
-                height: "120px",
-                borderRadius: "50%",
-                margin: "0 auto 15px",
-                overflow: "hidden",
-                border: "4px solid #d4af37",
-                background: "white",
-                boxShadow: "0 8px 25px rgba(0,0,0,0.2)"
-              }}>
+        <div style={styles.modalOverlay} onClick={() => setSelected(null)}>
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <div style={styles.modalPhoto}>
                 {selected.image_url ? (
-                  <img src={selected.image_url} style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    objectPosition: "center top"
-                  }} alt={selected.name} />
+                  <img src={selected.image_url} style={styles.modalAvatar} alt={selected.name} />
                 ) : (
-                  <div style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "50px",
-                    background: "#f5f5f5",
-                    color: "#999"
-                  }}>👨‍🎓</div>
+                  <div style={styles.modalAvatarPlaceholder}>👨‍🎓</div>
                 )}
               </div>
-              <h2 style={{ margin: "0 0 5px 0", fontSize: "28px", color: "white" }}>{selected.name}</h2>
-              <p style={{ margin: 0, fontSize: "14px", opacity: 0.9 }}>Admission No: {selected.admission_no} • {getCourseName(selected.course)}</p>
+              <div style={styles.modalInfo}>
+                <h2 style={styles.modalName}>{selected.name}</h2>
+                <p style={styles.modalId}>Admission No: {selected.admission_no}</p>
+                <span style={styles.modalCourse}>{getCourseName(selected.course)}</span>
+              </div>
             </div>
 
-            {/* Content Sections */}
-            <div style={{ padding: "30px" }}>
-              {/* 3 Column Grid */}
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-                gap: "20px",
-                marginBottom: "25px"
-              }}>
-                {/* Personal Information */}
-                <div style={{
-                  background: "#f8f9fa",
-                  borderRadius: "16px",
-                  padding: "18px"
-                }}>
-                  <h3 style={{ margin: "0 0 15px 0", fontSize: "16px", color: "#667eea", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span>👤</span> Personal Information
-                  </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <div><span style={{ color: "#666", fontSize: "12px", display: "block" }}>Phone Number</span><strong>{selected.phone || "Not provided"}</strong></div>
-                    <div><span style={{ color: "#666", fontSize: "12px", display: "block" }}>Email Address</span><strong>{selected.email || "Not provided"}</strong></div>
-                    <div><span style={{ color: "#666", fontSize: "12px", display: "block" }}>Date of Birth</span><strong>{selected.dob || "Not provided"}</strong></div>
-                    <div><span style={{ color: "#666", fontSize: "12px", display: "block" }}>Blood Group</span><strong>{selected.blood_group || "Not provided"}</strong></div>
-                  </div>
-                </div>
-
-                {/* Parent Information */}
-                <div style={{
-                  background: "#f8f9fa",
-                  borderRadius: "16px",
-                  padding: "18px"
-                }}>
-                  <h3 style={{ margin: "0 0 15px 0", fontSize: "16px", color: "#667eea", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span>👨‍👩‍👧</span> Parent Information
-                  </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <div><span style={{ color: "#666", fontSize: "12px", display: "block" }}>Parent Name</span><strong>{selected.parent_name || "Not provided"}</strong></div>
-                    <div><span style={{ color: "#666", fontSize: "12px", display: "block" }}>Parent Phone</span><strong>{selected.parent_phone || "Not provided"}</strong></div>
-                  </div>
-                </div>
-
-                {/* Address Information */}
-                <div style={{
-                  background: "#f8f9fa",
-                  borderRadius: "16px",
-                  padding: "18px"
-                }}>
-                  <h3 style={{ margin: "0 0 15px 0", fontSize: "16px", color: "#667eea", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span>📍</span> Address
-                  </h3>
-                  <div><span style={{ color: "#666", fontSize: "12px", display: "block" }}>Residential Address</span><strong>{selected.address || "Not provided"}</strong></div>
+            <div style={styles.modalBody}>
+              <div style={styles.modalSection}>
+                <h4 style={styles.modalSectionTitle}>👤 Personal Information</h4>
+                <div style={styles.modalGrid}>
+                  <div><span>📞 Phone:</span> <strong>{selected.phone || "Not provided"}</strong></div>
+                  <div><span>📧 Email:</span> <strong>{selected.email || "Not provided"}</strong></div>
+                  <div><span>🎂 DOB:</span> <strong>{selected.dob || "Not provided"}</strong></div>
+                  <div><span>🩸 Blood:</span> <strong>{selected.blood_group || "Not provided"}</strong></div>
+                  <div><span>⚥ Gender:</span> <strong>{selected.gender || "Not provided"}</strong></div>
                 </div>
               </div>
 
-              {/* Additional Details */}
+              <div style={styles.modalSection}>
+                <h4 style={styles.modalSectionTitle}>👨‍👩‍👧 Parent Information</h4>
+                <div style={styles.modalGrid}>
+                  <div><span>👨‍👩 Parent:</span> <strong>{selected.parent_name || "Not provided"}</strong></div>
+                  <div><span>📱 Parent Phone:</span> <strong>{selected.parent_phone || "Not provided"}</strong></div>
+                </div>
+              </div>
+
+              <div style={styles.modalSection}>
+                <h4 style={styles.modalSectionTitle}>📍 Address</h4>
+                <p style={styles.modalAddress}>{selected.address || "Not provided"}</p>
+              </div>
+
               {selected.details && (
-                <div style={{
-                  background: "#f8f9fa",
-                  borderRadius: "16px",
-                  padding: "18px",
-                  marginBottom: "20px"
-                }}>
-                  <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#667eea", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span>📝</span> Additional Information
-                  </h3>
-                  <p style={{ margin: 0, color: "#555", lineHeight: "1.6" }}>{selected.details}</p>
+                <div style={styles.modalSection}>
+                  <h4 style={styles.modalSectionTitle}>📝 Additional Information</h4>
+                  <p style={styles.modalDetails}>{selected.details}</p>
                 </div>
               )}
+            </div>
 
-              {/* Close Button */}
-              <div style={{ textAlign: "center" }}>
-                <button style={{
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  color: "white",
-                  border: "none",
-                  padding: "12px 32px",
-                  borderRadius: "12px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  fontWeight: "600"
-                }} onClick={() => setSelected(null)}>Close</button>
-              </div>
+            <div style={styles.modalFooter}>
+              <button style={styles.modalCloseBtn} onClick={() => setSelected(null)}>Close</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Animation Styles */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          @keyframes modalSlideUp {
-            from {
-              opacity: 0;
-              transform: translateY(30px) scale(0.95);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
-          }
-          
-          button:hover {
-            transform: translateY(-2px);
-            transition: transform 0.2s;
-          }
-          
-          button:active {
-            transform: translateY(0);
-          }
-          
-          .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-          }
-        `
-      }} />
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        button:hover { transform: translateY(-1px); transition: all 0.2s; }
+        .student-card:hover { transform: translateY(-4px); transition: all 0.3s ease; }
+      `}} />
     </div>
   );
 }
+
+const styles = {
+  container: {
+    padding: "24px",
+    background: "#f5f7fb",
+    minHeight: "calc(100vh - 70px)",
+    fontFamily: "'Inter', 'Segoe UI', sans-serif",
+  },
+  schoolHeader: {
+    textAlign: "center",
+    marginBottom: "24px",
+    padding: "20px",
+    background: "linear-gradient(135deg, #1a472a, #2e5c3a)",
+    borderRadius: "16px",
+    border: "1px solid #d4af37",
+  },
+  schoolName: {
+    fontSize: "clamp(20px, 4vw, 28px)",
+    fontWeight: "bold",
+    color: "#d4af37",
+    margin: 0,
+  },
+  schoolAddress: {
+    fontSize: "12px",
+    color: "#e0e0e0",
+    marginTop: "8px",
+  },
+  toast: {
+    position: "fixed",
+    top: "20px",
+    right: "20px",
+    background: "#10b981",
+    color: "white",
+    padding: "12px 20px",
+    borderRadius: "12px",
+    zIndex: 1001,
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    animation: "slideIn 0.3s ease",
+  },
+  toastBtn: {
+    background: "rgba(255,255,255,0.2)",
+    border: "none",
+    color: "white",
+    padding: "4px 12px",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: "rgba(0,0,0,0.7)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  confirmDialog: {
+    background: "white",
+    borderRadius: "20px",
+    padding: "24px",
+    width: "380px",
+    maxWidth: "90vw",
+  },
+  confirmTitle: {
+    margin: "0 0 12px 0",
+    color: "#dc3545",
+    fontSize: "20px",
+  },
+  confirmMessage: {
+    color: "#555",
+    marginBottom: "24px",
+  },
+  confirmActions: {
+    display: "flex",
+    gap: "12px",
+    justifyContent: "flex-end",
+  },
+  cancelBtn: {
+    padding: "8px 20px",
+    background: "#6c757d",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+  },
+  confirmBtn: {
+    padding: "8px 20px",
+    background: "#28a745",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+  },
+  backBtn: {
+    background: "linear-gradient(135deg, #1a472a, #2e5c3a)",
+    color: "white",
+    border: "none",
+    padding: "8px 20px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: "500",
+    marginBottom: "20px",
+  },
+  formCard: {
+    background: "white",
+    borderRadius: "24px",
+    padding: "24px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+    marginBottom: "30px",
+  },
+  formHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "24px",
+    paddingBottom: "16px",
+    borderBottom: "1px solid #e2e8f0",
+  },
+  formTitle: {
+    margin: 0,
+    fontSize: "20px",
+    fontWeight: "600",
+    color: "#1e293b",
+  },
+  cancelEditBtn: {
+    background: "#f1f5f9",
+    border: "none",
+    padding: "6px 16px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    color: "#475569",
+  },
+  // New styles for login credentials section
+  loginCredentialsSection: {
+    background: "linear-gradient(135deg, #fef9e7 0%, #fff8e7 100%)",
+    borderRadius: "16px",
+    padding: "20px",
+    marginBottom: "24px",
+    border: "2px solid #d4af37",
+    boxShadow: "0 2px 8px rgba(212, 175, 55, 0.2)",
+  },
+  loginSectionHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    marginBottom: "16px",
+    paddingBottom: "12px",
+    borderBottom: "1px solid #d4af37",
+  },
+  loginIcon: {
+    fontSize: "24px",
+  },
+  loginSectionTitle: {
+    fontSize: "18px",
+    fontWeight: "700",
+    color: "#1a472a",
+    margin: 0,
+  },
+  loginBadge: {
+    background: "#d4af37",
+    color: "#1a472a",
+    padding: "4px 12px",
+    borderRadius: "20px",
+    fontSize: "11px",
+    fontWeight: "600",
+    marginLeft: "auto",
+  },
+  loginCredentialsGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "20px",
+  },
+  highlightField: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  highlightLabel: {
+    fontSize: "14px",
+    fontWeight: "700",
+    color: "#1a472a",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  labelIcon: {
+    fontSize: "16px",
+  },
+  highlightInput: {
+    padding: "12px 14px",
+    borderRadius: "12px",
+    border: "2px solid #d4af37",
+    fontSize: "14px",
+    outline: "none",
+    transition: "all 0.2s",
+    background: "white",
+    fontWeight: "500",
+  },
+  highlightHint: {
+    fontSize: "11px",
+    color: "#1a472a",
+    marginTop: "4px",
+    fontWeight: "500",
+  },
+  // Section divider styles
+  sectionDivider: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    margin: "24px 0 20px 0",
+    padding: "8px 0",
+    borderBottom: "2px solid #e2e8f0",
+  },
+  sectionDividerIcon: {
+    fontSize: "20px",
+    background: "#f1f5f9",
+    padding: "6px 10px",
+    borderRadius: "10px",
+  },
+  sectionDividerText: {
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#1a472a",
+  },
+  formGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: "20px",
+  },
+  formField: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  formFieldFull: {
+    gridColumn: "1 / -1",
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  formLabel: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#334155",
+  },
+  formInput: {
+    padding: "10px 12px",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
+    fontSize: "14px",
+    outline: "none",
+    transition: "all 0.2s",
+  },
+  formSelect: {
+    padding: "10px 12px",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
+    fontSize: "14px",
+    outline: "none",
+    background: "white",
+  },
+  formTextarea: {
+    padding: "10px 12px",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
+    fontSize: "14px",
+    outline: "none",
+    resize: "vertical",
+    fontFamily: "inherit",
+  },
+  formFile: {
+    padding: "8px",
+    border: "1px solid #e2e8f0",
+    borderRadius: "10px",
+    fontSize: "13px",
+  },
+  passwordWrapper: {
+    position: "relative",
+  },
+  passwordToggle: {
+    position: "absolute",
+    right: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "16px",
+    color: "#94a3b8",
+  },
+  errorText: {
+    fontSize: "11px",
+    color: "#dc3545",
+  },
+  submitBtn: {
+    width: "100%",
+    marginTop: "24px",
+    padding: "12px",
+    background: "linear-gradient(135deg, #059669, #047857)",
+    color: "white",
+    border: "none",
+    borderRadius: "12px",
+    fontSize: "15px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  filterBar: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "12px",
+    marginBottom: "20px",
+  },
+  searchWrapper: {
+    display: "flex",
+    alignItems: "center",
+    background: "white",
+    borderRadius: "12px",
+    padding: "0 12px",
+    border: "1px solid #e2e8f0",
+    flex: 1,
+    minWidth: "200px",
+  },
+  searchIcon: {
+    fontSize: "16px",
+    color: "#94a3b8",
+  },
+  searchInput: {
+    flex: 1,
+    padding: "10px 8px",
+    border: "none",
+    outline: "none",
+    fontSize: "14px",
+    background: "transparent",
+  },
+  filterSelect: {
+    padding: "10px 16px",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
+    background: "white",
+    fontSize: "14px",
+  },
+  actionGroup: {
+    display: "flex",
+    gap: "8px",
+    flexWrap: "wrap",
+  },
+  actionBtn: {
+    padding: "8px 16px",
+    background: "#17a2b8",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: "500",
+  },
+  actionBtnGold: {
+    padding: "8px 16px",
+    background: "#d4af37",
+    color: "#1a472a",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: "500",
+  },
+  viewToggle: {
+    padding: "8px 16px",
+    background: "#e2e8f0",
+    color: "#475569",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: "500",
+  },
+  viewToggleActive: {
+    background: "#1a472a",
+    color: "white",
+  },
+  totalCount: {
+    background: "white",
+    padding: "12px 20px",
+    borderRadius: "12px",
+    marginBottom: "20px",
+    fontSize: "14px",
+    fontWeight: "500",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+  },
+  tableWrapper: {
+    background: "white",
+    borderRadius: "20px",
+    overflow: "hidden",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+  tableHeader: {
+    background: "#f8fafc",
+    borderBottom: "2px solid #e2e8f0",
+  },
+  th: {
+    padding: "14px 16px",
+    textAlign: "left",
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "#475569",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+  },
+  td: {
+    padding: "12px 16px",
+    borderBottom: "1px solid #f1f5f9",
+    fontSize: "14px",
+    color: "#334155",
+  },
+  tableRow: {
+    cursor: "pointer",
+    transition: "background 0.2s",
+    "&:hover": {
+      background: "#f8fafc",
+    },
+  },
+  tableAvatar: {
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    objectFit: "cover",
+  },
+  tableAvatarPlaceholder: {
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    background: "#e2e8f0",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "18px",
+  },
+  courseBadge: {
+    display: "inline-block",
+    background: "#eef2ff",
+    color: "#4f46e5",
+    padding: "4px 10px",
+    borderRadius: "20px",
+    fontSize: "11px",
+    fontWeight: "500",
+  },
+  editBtn: {
+    background: "#10b981",
+    color: "white",
+    border: "none",
+    padding: "6px 10px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    marginRight: "6px",
+    fontSize: "12px",
+  },
+  deleteBtn: {
+    background: "#ef4444",
+    color: "white",
+    border: "none",
+    padding: "6px 10px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "12px",
+  },
+  emptyRow: {
+    textAlign: "center",
+    padding: "48px",
+    color: "#94a3b8",
+  },
+  cardGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+    gap: "20px",
+  },
+  studentCard: {
+    background: "white",
+    borderRadius: "20px",
+    padding: "20px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+    cursor: "pointer",
+    transition: "all 0.2s",
+  },
+  cardHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    marginBottom: "16px",
+  },
+  cardPhoto: {
+    flexShrink: 0,
+  },
+  cardAvatar: {
+    width: "70px",
+    height: "70px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "2px solid #d4af37",
+  },
+  cardAvatarPlaceholder: {
+    width: "70px",
+    height: "70px",
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #1a472a, #2e5c3a)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "32px",
+    color: "white",
+  },
+  cardInfo: {
+    flex: 1,
+  },
+  cardName: {
+    fontSize: "18px",
+    fontWeight: "600",
+    margin: "0 0 4px 0",
+    color: "#1e293b",
+  },
+  cardAdmission: {
+    fontSize: "11px",
+    color: "#1a472a",
+    margin: "0 0 6px 0",
+    fontWeight: "500",
+  },
+  cardCourse: {
+    display: "inline-block",
+    background: "#eef2ff",
+    color: "#4f46e5",
+    padding: "3px 10px",
+    borderRadius: "20px",
+    fontSize: "11px",
+    fontWeight: "500",
+  },
+  cardDetails: {
+    borderTop: "1px solid #e2e8f0",
+    paddingTop: "12px",
+    marginBottom: "12px",
+  },
+  cardDetailItem: {
+    fontSize: "12px",
+    color: "#475569",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "4px 0",
+  },
+  cardActions: {
+    display: "flex",
+    gap: "10px",
+  },
+  cardEditBtn: {
+    flex: 1,
+    background: "#10b981",
+    color: "white",
+    border: "none",
+    padding: "8px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "500",
+  },
+  cardDeleteBtn: {
+    flex: 1,
+    background: "#ef4444",
+    color: "white",
+    border: "none",
+    padding: "8px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "500",
+  },
+  modalContent: {
+    background: "white",
+    borderRadius: "28px",
+    maxWidth: "700px",
+    width: "90%",
+    maxHeight: "85vh",
+    overflowY: "auto",
+    position: "relative",
+  },
+  modalHeader: {
+    background: "linear-gradient(135deg, #1a472a, #2e5c3a)",
+    padding: "32px",
+    textAlign: "center",
+    borderTopLeftRadius: "28px",
+    borderTopRightRadius: "28px",
+  },
+  modalPhoto: {
+    marginBottom: "16px",
+  },
+  modalAvatar: {
+    width: "100px",
+    height: "100px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "3px solid #d4af37",
+  },
+  modalAvatarPlaceholder: {
+    width: "100px",
+    height: "100px",
+    borderRadius: "50%",
+    background: "rgba(255,255,255,0.2)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "48px",
+    color: "white",
+    margin: "0 auto",
+  },
+  modalInfo: {
+    color: "white",
+  },
+  modalName: {
+    fontSize: "24px",
+    margin: "0 0 6px 0",
+  },
+  modalId: {
+    fontSize: "13px",
+    opacity: 0.8,
+    margin: "0 0 8px 0",
+  },
+  modalCourse: {
+    display: "inline-block",
+    background: "rgba(255,255,255,0.2)",
+    padding: "4px 14px",
+    borderRadius: "20px",
+    fontSize: "12px",
+  },
+  modalBody: {
+    padding: "24px",
+  },
+  modalSection: {
+    marginBottom: "24px",
+  },
+  modalSectionTitle: {
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#1a472a",
+    margin: "0 0 12px 0",
+    paddingBottom: "8px",
+    borderBottom: "2px solid #e2e8f0",
+  },
+  modalGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "12px",
+    fontSize: "14px",
+    "& span": {
+      color: "#64748b",
+      marginRight: "8px",
+      minWidth: "95px",
+      display: "inline-block",
+    },
+  },
+  modalAddress: {
+    fontSize: "14px",
+    color: "#475569",
+    lineHeight: "1.5",
+    margin: 0,
+  },
+  modalDetails: {
+    fontSize: "14px",
+    color: "#475569",
+    lineHeight: "1.6",
+    margin: 0,
+  },
+  modalFooter: {
+    padding: "16px 24px",
+    borderTop: "1px solid #e2e8f0",
+    textAlign: "center",
+  },
+  modalCloseBtn: {
+    padding: "10px 32px",
+    background: "linear-gradient(135deg, #1a472a, #2e5c3a)",
+    color: "white",
+    border: "none",
+    borderRadius: "40px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "500",
+  },
+};
 
 export default Students;

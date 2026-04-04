@@ -5,21 +5,43 @@ import bgImg from "../assets/adbg.png";
 function AdminDashboard() {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth > 768 && window.innerWidth <= 1024);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [stats, setStats] = useState({
+    total_students: 0,
+    total_teachers: 0,
+    total_courses: 0,
+    total_fees_collected: 0,
+    total_fees_pending: 0,
+    total_activity_registrations: 0,
+    total_salary_paid: 0,
+  });
 
   useEffect(() => {
     const isAdmin = localStorage.getItem("admin");
     if (!isAdmin) navigate("/admin-login");
+    fetchStats();
   }, [navigate]);
 
-  // Check screen size for responsive adjustments
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
+      setIsTablet(window.innerWidth > 768 && window.innerWidth <= 1024);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/dashboard-stats/");
+      const data = await res.json();
+      setStats(data);
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    }
+  };
 
   const username = localStorage.getItem("username");
 
@@ -37,46 +59,75 @@ function AdminDashboard() {
       icon: "🎓", 
       path: "/admin/students", 
       color: "#6366f1",
-      description: "Manage student records"
+      gradient: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+      description: "Manage student records",
+      count: stats.total_students
     },
     { 
       title: "Teachers", 
       icon: "👨‍🏫", 
       path: "/admin/teachers", 
       color: "#10b981",
-      description: "Manage teacher profiles"
+      gradient: "linear-gradient(135deg, #10b981 0%, #34d399 100%)",
+      description: "Manage teacher profiles",
+      count: stats.total_teachers
     },
-     { 
-    title: "Courses", 
-    icon: "📚", 
-    path: "/admin/courses", 
-    color: "#8b5cf6",
-    description: "Manage class levels"
-  },
+    { 
+      title: "Courses", 
+      icon: "📚", 
+      path: "/admin/courses", 
+      color: "#8b5cf6",
+      gradient: "linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)",
+      description: "Manage class levels",
+      count: stats.total_courses
+    },
     { 
       title: "Fees", 
       icon: "💰", 
       path: "/admin/fees", 
       color: "#f59e0b",
-      description: "Track fee collections"
+      gradient: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+      description: "Track fee collections",
+      count: `₹${stats.total_fees_collected.toLocaleString()}`
+    },
+    { 
+      title: "Extra Activities", 
+      icon: "🎯", 
+      path: "/admin/extra-activities", 
+      color: "#ec489a",
+      gradient: "linear-gradient(135deg, #ec489a 0%, #f472b6 100%)",
+      description: "Manage Abacus, Chess & more",
+      count: stats.total_activity_registrations
+    },
+    { 
+      title: "Teacher Salary", 
+      icon: "💵", 
+      path: "/admin/teacher-salary", 
+      color: "#06b6d4",
+      gradient: "linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)",
+      description: "Manage teacher salaries",
+      count: `₹${stats.total_salary_paid.toLocaleString()}`
     },
     { 
       title: "Notices", 
       icon: "📢", 
       path: "/admin/notices", 
       color: "#ef4444",
-      description: "Post important updates"
+      gradient: "linear-gradient(135deg, #ef4444 0%, #f87171 100%)",
+      description: "Post important updates",
+      count: "Manage"
     },
     { 
       title: "Gallery", 
       icon: "🖼️", 
       path: "/admin/gallery", 
       color: "#0ea5e9",
-      description: "Manage media gallery"
+      gradient: "linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)",
+      description: "Manage media gallery",
+      count: "Manage"
     },
   ];
 
-  // Get current time greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -84,7 +135,6 @@ function AdminDashboard() {
     return "Good Evening";
   };
 
-  // Get current date
   const getCurrentDate = () => {
     const date = new Date();
     return date.toLocaleDateString("en-IN", {
@@ -95,176 +145,277 @@ function AdminDashboard() {
     });
   };
 
+  // Responsive grid columns based on screen size
+  const getGridColumns = () => {
+    if (isMobile) return "1fr";
+    if (isTablet) return "repeat(2, 1fr)";
+    return "repeat(auto-fill, minmax(300px, 1fr))";
+  };
+
   return (
     <div style={styles.container}>
-      {/* OVERLAY */}
-      <div style={isMobile ? {...styles.overlay, padding: "20px"} : {...styles.overlay, padding: "30px"}}>
+      <div style={{
+        ...styles.overlay,
+        padding: isMobile ? "16px" : isTablet ? "24px" : "30px"
+      }}>
         
-        {/* HEADER */}
-        <div style={styles.header}>
+        {/* Animated Background Orbs */}
+        <div style={styles.orb1}></div>
+        <div style={styles.orb2}></div>
+        <div style={styles.orb3}></div>
+
+        {/* Header Section - Responsive */}
+        <div style={{
+          ...styles.header,
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "flex-start" : "flex-start",
+          marginBottom: isMobile ? "25px" : "40px"
+        }}>
           <div style={styles.headerLeft}>
             <div style={styles.welcomeBadge}>
+              <span style={styles.greetingIcon}>✨</span>
               <span style={styles.greeting}>{getGreeting()}</span>
             </div>
-            <h1 style={styles.title}>Admin Dashboard</h1>
-            <p style={styles.user}>
-              Welcome back, <strong>{username || "Admin"}</strong>
-            </p>
-            <p style={styles.date}>{getCurrentDate()}</p>
+            <h1 style={{
+              ...styles.title,
+              fontSize: isMobile ? "28px" : isTablet ? "36px" : "44px"
+            }}>
+              <span style={styles.titleHighlight}>Admin</span> Dashboard
+            </h1>
+            <div style={{
+              ...styles.userInfo,
+              flexDirection: isMobile ? "column" : "row",
+              alignItems: isMobile ? "flex-start" : "center",
+              gap: isMobile ? "8px" : "16px"
+            }}>
+              <p style={styles.user}>Welcome back, <strong>{username || "Administrator"}</strong></p>
+              <div style={styles.dateChip}>
+                <span>📅</span>
+                <span>{getCurrentDate()}</span>
+              </div>
+            </div>
           </div>
 
-          <button 
-            style={styles.logout} 
-            onClick={() => setShowLogoutConfirm(true)}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-          >
-            🚪 Logout
+          <button style={{
+            ...styles.logoutBtn,
+            width: isMobile ? "100%" : "auto",
+            justifyContent: "center"
+          }} onClick={() => setShowLogoutConfirm(true)}>
+            <span>🚪</span>
+            <span>Logout</span>
           </button>
         </div>
 
-        {/* STATS CARDS - Removed Quick Access */}
-        <div style={styles.statsContainer}>
+        {/* Stats Cards - Responsive Grid */}
+        <div style={{
+          ...styles.statsGrid,
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: isMobile ? "12px" : "20px",
+          marginBottom: isMobile ? "30px" : "45px"
+        }}>
           <div style={styles.statCard}>
-            <div style={styles.statIcon}>📊</div>
-            <div style={styles.statInfo}>
-              <div style={styles.statValue}>6</div>
-              <div style={styles.statLabel}>Modules</div>
+            <div style={styles.statIconWrapper}>
+              <span style={styles.statIcon}>👨‍🎓</span>
             </div>
+            <div style={styles.statContent}>
+              <div style={{
+                ...styles.statValue,
+                fontSize: isMobile ? "22px" : "26px"
+              }}>{stats.total_students}</div>
+              <div style={styles.statLabel}>Total Students</div>
+            </div>
+            <div style={styles.statBadge}>Active</div>
           </div>
           <div style={styles.statCard}>
-            <div style={styles.statIcon}>🎯</div>
-            <div style={styles.statInfo}>
-              <div style={styles.statValue}>Active</div>
-              <div style={styles.statLabel}>Management</div>
+            <div style={styles.statIconWrapper}>
+              <span style={styles.statIcon}>👨‍🏫</span>
             </div>
+            <div style={styles.statContent}>
+              <div style={{
+                ...styles.statValue,
+                fontSize: isMobile ? "22px" : "26px"
+              }}>{stats.total_teachers}</div>
+              <div style={styles.statLabel}>Total Teachers</div>
+            </div>
+            <div style={styles.statBadge}>Active</div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statIconWrapper}>
+              <span style={styles.statIcon}>💰</span>
+            </div>
+            <div style={styles.statContent}>
+              <div style={{
+                ...styles.statValue,
+                fontSize: isMobile ? "18px" : "26px"
+              }}>₹{stats.total_fees_collected.toLocaleString()}</div>
+              <div style={styles.statLabel}>Fees Collected</div>
+            </div>
+            <div style={styles.statBadge}>Total</div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statIconWrapper}>
+              <span style={styles.statIcon}>⚠️</span>
+            </div>
+            <div style={styles.statContent}>
+              <div style={{
+                ...styles.statValue,
+                fontSize: isMobile ? "18px" : "26px"
+              }}>₹{stats.total_fees_pending.toLocaleString()}</div>
+              <div style={styles.statLabel}>Pending Fees</div>
+            </div>
+            <div style={styles.statBadge}>Due</div>
           </div>
         </div>
 
-        {/* SECTION TITLE */}
-        <div style={styles.sectionTitle}>
-          <h2 style={styles.sectionHeading}>Management Modules</h2>
-          <p style={styles.sectionSubtitle}>Click on any card to manage</p>
+        {/* Section Title - Responsive */}
+        <div style={{
+          ...styles.sectionHeader,
+          marginBottom: isMobile ? "25px" : "35px",
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? "12px" : "20px"
+        }}>
+          <div style={styles.sectionLine}></div>
+          <div style={styles.sectionText}>
+            <h2 style={{
+              ...styles.sectionTitle,
+              fontSize: isMobile ? "20px" : "26px"
+            }}>Management Modules</h2>
+            <p style={styles.sectionSubtitle}>Click on any card to manage</p>
+          </div>
+          <div style={styles.sectionLine}></div>
         </div>
 
-        {/* GRID */}
-        <div style={styles.grid}>
+        {/* Cards Grid - Responsive */}
+        <div style={{
+          ...styles.grid,
+          gridTemplateColumns: getGridColumns(),
+          gap: isMobile ? "16px" : "25px",
+          marginBottom: isMobile ? "30px" : "50px"
+        }}>
           {cards.map((card, i) => (
             <div
               key={i}
               style={{
                 ...styles.card,
-                borderTop: `4px solid ${card.color}`,
-                animation: `fadeInUp 0.5s ease ${i * 0.1}s both`
+                animation: `slideUp 0.5s ease ${i * 0.08}s both`
               }}
+              onMouseEnter={() => setHoveredCard(i)}
+              onMouseLeave={() => setHoveredCard(null)}
               onClick={() => navigate(card.path)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-8px) scale(1.02)";
-                e.currentTarget.style.boxShadow = `0 20px 40px ${card.color}40`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0) scale(1)";
-                e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.08)";
-              }}
             >
-              <div style={{...styles.icon, background: `${card.color}20`}}>
-                {card.icon}
+              <div style={{...styles.cardBorder, background: card.gradient}}></div>
+              <div style={{
+                ...styles.cardInner,
+                padding: isMobile ? "20px" : "28px"
+              }}>
+                <div style={{
+                  ...styles.cardIcon,
+                  width: isMobile ? "60px" : "70px",
+                  height: isMobile ? "60px" : "70px"
+                }}>
+                  <span style={{
+                    ...styles.cardIconEmoji,
+                    fontSize: isMobile ? "30px" : "36px"
+                  }}>{card.icon}</span>
+                </div>
+                <h3 style={{
+                  ...styles.cardTitle,
+                  fontSize: isMobile ? "18px" : "20px"
+                }}>{card.title}</h3>
+                <p style={styles.cardDesc}>{card.description}</p>
+                <div style={styles.cardCount}>
+                  <span style={{...styles.countBadge, background: card.color}}>
+                    {card.count}
+                  </span>
+                </div>
+                <div style={styles.cardFooter}>
+                  <span style={styles.cardArrow}>
+                    Manage Module
+                    <span style={styles.cardArrowIcon}>→</span>
+                  </span>
+                </div>
               </div>
-              <h3 style={styles.cardTitle}>{card.title}</h3>
-              <p style={styles.cardDescription}>{card.description}</p>
-              <div style={{...styles.cardFooter, borderTopColor: `${card.color}20`}}>
-                <span style={styles.cardArrow}>→</span>
-              </div>
+              {hoveredCard === i && (
+                <div style={{...styles.cardGlow, background: card.gradient}}></div>
+              )}
             </div>
           ))}
         </div>
 
-        {/* LOGOUT CONFIRMATION MODAL */}
+        {/* Footer - Responsive */}
+        <div style={styles.footer}>
+          <p>© 2026 Paradise Islamic Pre-School | All Rights Reserved</p>
+        </div>
+
+        {/* Logout Modal - Responsive */}
         {showLogoutConfirm && (
           <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
-            <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div style={{
+              ...styles.modal,
+              width: isMobile ? "90%" : "340px",
+              padding: isMobile ? "24px" : "32px"
+            }} onClick={(e) => e.stopPropagation()}>
               <div style={styles.modalIcon}>🚪</div>
-              <h3 style={styles.modalTitle}>Confirm Logout</h3>
-              <p style={styles.modalText}>Are you sure you want to logout?</p>
-              <div style={styles.modalButtons}>
-                <button 
-                  style={styles.modalCancel}
-                  onClick={() => setShowLogoutConfirm(false)}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e7eb")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "#f3f4f6")}
-                >
-                  Cancel
-                </button>
-                <button 
-                  style={styles.modalConfirm}
-                  onClick={handleLogout}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#dc2626")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "#ef4444")}
-                >
-                  Logout
-                </button>
+              <h3 style={{
+                ...styles.modalTitle,
+                fontSize: isMobile ? "20px" : "22px"
+              }}>Confirm Logout</h3>
+              <p style={styles.modalText}>Are you sure you want to logout from the admin dashboard?</p>
+              <div style={{
+                ...styles.modalButtons,
+                flexDirection: isMobile ? "column" : "row",
+                gap: isMobile ? "10px" : "12px"
+              }}>
+                <button style={styles.modalCancel} onClick={() => setShowLogoutConfirm(false)}>Cancel</button>
+                <button style={styles.modalConfirm} onClick={handleLogout}>Logout</button>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Add keyframes animation */}
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(40px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          25% { transform: translate(15px, -20px) rotate(5deg); }
+          50% { transform: translate(-10px, 15px) rotate(-3deg); }
+          75% { transform: translate(20px, 10px) rotate(2deg); }
+        }
         @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.08); }
+        }
+        @keyframes modalFadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
         }
         
-        /* Responsive styles */
+        /* Responsive touch improvements */
         @media (max-width: 768px) {
-          .admin-dashboard-card {
-            padding: 20px !important;
+          button {
+            -webkit-tap-highlight-color: transparent;
           }
-          .admin-dashboard-card-title {
-            font-size: 18px !important;
-          }
-          .admin-dashboard-stat-card {
-            padding: 12px 16px !important;
-          }
-          .admin-dashboard-stat-value {
-            font-size: 20px !important;
+          .stat-card {
+            padding: 14px 18px !important;
           }
         }
         
-        @media (max-width: 480px) {
-          .admin-dashboard-header {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-          }
-          .admin-dashboard-grid {
-            grid-template-columns: 1fr !important;
-            gap: 15px !important;
-          }
-          .admin-dashboard-stats-container {
-            grid-template-columns: 1fr !important;
-          }
-          .admin-dashboard-modal {
-            width: 280px !important;
-            padding: 20px !important;
+        /* Desktop hover effects */
+        @media (min-width: 1024px) {
+          .card:hover .card-arrow-icon {
+            transform: translateX(5px);
           }
         }
-      `}</style>
+        
+        /* Smooth scrolling */
+        * {
+          -webkit-overflow-scrolling: touch;
+        }
+      `}} />
     </div>
   );
 }
@@ -277,297 +428,388 @@ const styles = {
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",
     backgroundAttachment: "fixed",
+    position: "relative",
   },
-
-  // DARK GLASS OVERLAY
   overlay: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, rgba(0,0,0,0.75), rgba(0,0,0,0.65))",
-    backdropFilter: "blur(2px)",
+    background: "linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.75) 100%)",
+    backdropFilter: "blur(3px)",
+    position: "relative",
   },
-
+  orb1: {
+    position: "absolute",
+    top: "-150px",
+    right: "-100px",
+    width: "400px",
+    height: "400px",
+    background: "radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%)",
+    borderRadius: "50%",
+    animation: "float 25s ease-in-out infinite",
+    pointerEvents: "none",
+  },
+  orb2: {
+    position: "absolute",
+    bottom: "-100px",
+    left: "-150px",
+    width: "350px",
+    height: "350px",
+    background: "radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%)",
+    borderRadius: "50%",
+    animation: "float 20s ease-in-out infinite reverse",
+    pointerEvents: "none",
+  },
+  orb3: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "500px",
+    height: "500px",
+    background: "radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 70%)",
+    borderRadius: "50%",
+    animation: "pulse 15s ease-in-out infinite",
+    pointerEvents: "none",
+  },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: "30px",
     flexWrap: "wrap",
     gap: "20px",
+    position: "relative",
+    zIndex: 2,
   },
-
   headerLeft: {
     flex: 1,
   },
-
   welcomeBadge: {
-    display: "inline-block",
-    marginBottom: "10px",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(10px)",
+    padding: "5px 14px",
+    borderRadius: "40px",
+    marginBottom: "16px",
+    border: "1px solid rgba(255,255,255,0.15)",
   },
-
+  greetingIcon: {
+    fontSize: "14px",
+  },
   greeting: {
-    background: "rgba(255,255,255,0.2)",
-    padding: "4px 12px",
-    borderRadius: "20px",
-    fontSize: "12px",
+    fontSize: "13px",
     fontWeight: "500",
     color: "#f3f4f6",
   },
-
   title: {
-    fontSize: "clamp(28px, 5vw, 40px)",
     fontWeight: "800",
+    marginBottom: "12px",
     color: "#ffffff",
-    marginBottom: "8px",
-    letterSpacing: "-0.5px",
   },
-
+  titleHighlight: {
+    background: "linear-gradient(135deg, #10b981, #34d399)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+  },
+  userInfo: {
+    display: "flex",
+    flexWrap: "wrap",
+  },
   user: {
     color: "#d1d5db",
     fontSize: "14px",
-    marginBottom: "4px",
+    margin: 0,
+    strong: { color: "white", fontWeight: "600" },
   },
-
-  date: {
+  dateChip: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    background: "rgba(255,255,255,0.08)",
+    padding: "4px 12px",
+    borderRadius: "30px",
+    fontSize: "11px",
     color: "#9ca3af",
-    fontSize: "12px",
   },
-
-  logout: {
+  logoutBtn: {
     background: "linear-gradient(135deg, #ef4444, #dc2626)",
     color: "white",
     border: "none",
-    padding: "10px 20px",
-    borderRadius: "12px",
+    padding: "10px 22px",
+    borderRadius: "40px",
     cursor: "pointer",
     fontWeight: "600",
-    boxShadow: "0 5px 15px rgba(239,68,68,0.3)",
-    transition: "all 0.2s",
-    fontSize: "14px",
+    fontSize: "13px",
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    WebkitTapHighlightColor: "transparent",
+    transition: "all 0.3s ease",
+    boxShadow: "0 4px 15px rgba(239,68,68,0.3)",
+    "@media (hover: hover)": {
+      "&:hover": {
+        transform: "translateY(-2px)",
+        boxShadow: "0 8px 25px rgba(239,68,68,0.4)",
+      },
+    },
   },
-
-  statsContainer: {
+  statsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "15px",
-    marginBottom: "40px",
+    position: "relative",
+    zIndex: 2,
   },
-
   statCard: {
-    background: "rgba(255,255,255,0.1)",
+    background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(10px)",
-    padding: "15px 20px",
+    padding: "18px 22px",
+    borderRadius: "20px",
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    border: "1px solid rgba(255,255,255,0.12)",
+    transition: "all 0.3s ease",
+    position: "relative",
+    "@media (hover: hover)": {
+      "&:hover": {
+        transform: "translateY(-3px)",
+        background: "rgba(255,255,255,0.12)",
+        borderColor: "rgba(255,255,255,0.2)",
+      },
+    },
+  },
+  statIconWrapper: {
+    width: "50px",
+    height: "50px",
+    background: "rgba(255,255,255,0.1)",
     borderRadius: "16px",
     display: "flex",
     alignItems: "center",
-    gap: "15px",
-    border: "1px solid rgba(255,255,255,0.2)",
-    transition: "transform 0.3s ease",
+    justifyContent: "center",
+    flexShrink: 0,
   },
-
   statIcon: {
-    fontSize: "32px",
+    fontSize: "28px",
   },
-
-  statInfo: {
+  statContent: {
     flex: 1,
   },
-
   statValue: {
-    fontSize: "24px",
     fontWeight: "700",
     color: "white",
     lineHeight: 1,
+    marginBottom: "6px",
   },
-
   statLabel: {
     fontSize: "12px",
     color: "#d1d5db",
-    marginTop: "4px",
   },
-
-  sectionTitle: {
+  statBadge: {
+    position: "absolute",
+    top: "12px",
+    right: "12px",
+    background: "rgba(16,185,129,0.2)",
+    color: "#34d399",
+    padding: "2px 8px",
+    borderRadius: "12px",
+    fontSize: "9px",
+    fontWeight: "600",
+  },
+  sectionHeader: {
+    display: "flex",
+    alignItems: "center",
+    position: "relative",
+    zIndex: 2,
+  },
+  sectionLine: {
+    flex: 1,
+    height: "1px",
+    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+  },
+  sectionText: {
     textAlign: "center",
-    marginBottom: "30px",
   },
-
-  sectionHeading: {
-    fontSize: "clamp(20px, 4vw, 24px)",
+  sectionTitle: {
     fontWeight: "700",
     color: "white",
-    marginBottom: "8px",
+    marginBottom: "6px",
   },
-
   sectionSubtitle: {
-    fontSize: "14px",
-    color: "#d1d5db",
+    fontSize: "13px",
+    color: "#a1a1aa",
   },
-
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: "25px",
-    marginBottom: "40px",
+    position: "relative",
+    zIndex: 2,
   },
-
   card: {
-    background: "rgba(255,255,255,0.95)",
-    backdropFilter: "blur(10px)",
-    padding: "25px",
-    borderRadius: "20px",
-    textAlign: "center",
+    position: "relative",
+    background: "rgba(255,255,255,0.96)",
+    borderRadius: "24px",
+    overflow: "hidden",
     cursor: "pointer",
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+    "@media (hover: hover)": {
+      "&:hover": {
+        transform: "translateY(-6px)",
+        boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+      },
+    },
+  },
+  cardBorder: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "4px",
+  },
+  cardInner: {
+    textAlign: "center",
     position: "relative",
-    overflow: "hidden",
+    zIndex: 2,
   },
-
-  icon: {
-    fontSize: "48px",
-    marginBottom: "15px",
-    display: "inline-block",
-    padding: "15px",
-    borderRadius: "50%",
-    transition: "all 0.3s",
+  cardIcon: {
+    margin: "0 auto 18px",
+    borderRadius: "20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.3s ease",
   },
-
+  cardIconEmoji: {},
   cardTitle: {
-    fontSize: "20px",
     fontWeight: "700",
-    color: "#1f2933",
+    color: "#1f2937",
     marginBottom: "8px",
   },
-
-  cardDescription: {
+  cardDesc: {
     fontSize: "13px",
     color: "#6b7280",
-    marginBottom: "15px",
-    lineHeight: 1.4,
+    lineHeight: "1.5",
+    marginBottom: "16px",
   },
-
-  cardFooter: {
-    borderTop: "1px solid rgba(0,0,0,0.05)",
-    paddingTop: "12px",
-    marginTop: "5px",
+  cardCount: {
+    marginBottom: "16px",
   },
-
-  cardArrow: {
-    fontSize: "20px",
-    color: "#10b981",
-    transition: "transform 0.3s",
+  countBadge: {
     display: "inline-block",
+    padding: "4px 12px",
+    borderRadius: "20px",
+    color: "white",
+    fontSize: "13px",
+    fontWeight: "600",
   },
-
-  // Modal Styles
+  cardFooter: {
+    borderTop: "1px solid #f0f0f0",
+    paddingTop: "15px",
+  },
+  cardArrow: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#10b981",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    transition: "all 0.3s ease",
+  },
+  cardArrowIcon: {
+    fontSize: "14px",
+    transition: "transform 0.3s ease",
+  },
+  cardGlow: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.1,
+    pointerEvents: "none",
+    transition: "opacity 0.3s ease",
+  },
+  footer: {
+    textAlign: "center",
+    paddingTop: "20px",
+    borderTop: "1px solid rgba(255,255,255,0.1)",
+    position: "relative",
+    zIndex: 2,
+    p: {
+      fontSize: "11px",
+      color: "#6b7280",
+      margin: 0,
+    },
+  },
   modalOverlay: {
     position: "fixed",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    background: "rgba(0,0,0,0.7)",
-    backdropFilter: "blur(5px)",
+    background: "rgba(0,0,0,0.8)",
+    backdropFilter: "blur(8px)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1000,
   },
-
   modal: {
     background: "white",
-    padding: "30px",
-    borderRadius: "20px",
-    width: "320px",
-    maxWidth: "90%",
+    borderRadius: "24px",
     textAlign: "center",
-    animation: "fadeInUp 0.3s ease",
+    animation: "modalFadeIn 0.3s ease",
   },
-
   modalIcon: {
-    fontSize: "48px",
-    marginBottom: "15px",
+    fontSize: "52px",
+    marginBottom: "16px",
   },
-
   modalTitle: {
-    fontSize: "20px",
     fontWeight: "700",
-    color: "#1f2933",
+    color: "#1f2937",
     marginBottom: "10px",
   },
-
   modalText: {
     fontSize: "14px",
     color: "#6b7280",
-    marginBottom: "20px",
+    marginBottom: "24px",
+    lineHeight: "1.5",
   },
-
   modalButtons: {
     display: "flex",
-    gap: "12px",
   },
-
   modalCancel: {
     flex: 1,
-    padding: "10px",
+    padding: "12px",
     background: "#f3f4f6",
     color: "#374151",
     border: "none",
-    borderRadius: "10px",
+    borderRadius: "12px",
     cursor: "pointer",
-    fontWeight: "500",
-    transition: "all 0.2s",
+    fontWeight: "600",
+    fontSize: "14px",
+    transition: "all 0.2s ease",
+    "@media (hover: hover)": {
+      "&:hover": {
+        background: "#e5e7eb",
+      },
+    },
   },
-
   modalConfirm: {
     flex: 1,
-    padding: "10px",
+    padding: "12px",
     background: "#ef4444",
     color: "white",
     border: "none",
-    borderRadius: "10px",
+    borderRadius: "12px",
     cursor: "pointer",
-    fontWeight: "500",
-    transition: "all 0.2s",
+    fontWeight: "600",
+    fontSize: "14px",
+    transition: "all 0.2s ease",
+    "@media (hover: hover)": {
+      "&:hover": {
+        background: "#dc2626",
+        transform: "scale(1.02)",
+      },
+    },
   },
 };
-
-// Add hover effects for cards
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = `
-    /* Card hover effect */
-    .admin-card:hover .admin-card-arrow {
-      transform: translateX(5px);
-    }
-    
-    .admin-card:hover .admin-card-icon {
-      transform: scale(1.1);
-    }
-    
-    .admin-stat-card:hover {
-      transform: translateY(-3px);
-      background: rgba(255,255,255,0.15);
-    }
-    
-    /* Touch device optimization */
-    @media (hover: none) and (pointer: coarse) {
-      .admin-card {
-        transition: transform 0.1s ease;
-      }
-      .admin-card:active {
-        transform: scale(0.98);
-      }
-    }
-  `;
-  
-  if (!document.head.querySelector('#admin-dashboard-styles')) {
-    styleSheet.id = 'admin-dashboard-styles';
-    document.head.appendChild(styleSheet);
-  }
-}
 
 export default AdminDashboard;

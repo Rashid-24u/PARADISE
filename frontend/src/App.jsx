@@ -29,23 +29,29 @@ import GalleryAdmin from "./pages/admin/GalleryAdmin";
 import TeachersAdmin from "./pages/admin/TeachersAdmin";
 import CoursesAdmin from "./pages/admin/CoursesAdmin";
 
+// 🆕 NEW ADMIN MODULES
+import ExtraActivitiesAdmin from "./pages/admin/ExtraActivitiesAdmin";
+import TeacherSalaryAdmin from "./pages/admin/TeacherSalaryAdmin";
+
 // 👨‍🏫 TEACHER DASHBOARD
 import TeacherLayout from "./pages/teacher/TeacherLayout";
 import TeacherHome from "./pages/teacher/TeacherHome";
-import TeacherProfile from "./pages/teacher/TeacherProfile"; // 🔥 ADD
-import TeacherStudents from "./pages/teacher/Students";
-import Attendance from "./pages/teacher/Attendance";
-import Marks from "./pages/teacher/Marks";
+import TeacherProfile from "./pages/teacher/TeacherProfile";
+import TeacherStudents from "./pages/teacher/TeacherStudents";
+import Attendance from "./pages/teacher/TeacherAttendance";
+import Marks from "./pages/teacher/TeacherMarks";
 import Notes from "./pages/teacher/Notes";
-import Reports from "./pages/teacher/Reports";
+import Reports from "./pages/teacher/TeacherReports";
+import TeacherSalaryView from "./pages/teacher/TeacherSalaryView"; // 🆕 Teacher salary view
 
 // 🎓 STUDENT DASHBOARD
 import StudentLayout from "./pages/student/StudentLayout";
 import StudentHome from "./pages/student/StudentHome";
 import Profile from "./pages/student/Profile";
 import StudentAttendance from "./pages/student/Attendance";
-import StudentMarks from "./pages/student/Marks";
+import StudentMarks from "./pages/student/StudentMarks";
 import StudentNotes from "./pages/student/Notes";
+import StudentFeesView from "./pages/student/FeesView"; // 🆕 Student fees view
 
 function AppWrapper() {
   const location = useLocation();
@@ -80,6 +86,10 @@ function AppWrapper() {
         <Route path="/admin/gallery" element={<GalleryAdmin />} />
         <Route path="/admin/teachers" element={<TeachersAdmin />} />
         <Route path="/admin/courses" element={<CoursesAdmin />} />
+        
+        {/* 🆕 NEW ADMIN ROUTES */}
+        <Route path="/admin/extra-activities" element={<ExtraActivitiesAdmin />} />
+        <Route path="/admin/teacher-salary" element={<TeacherSalaryAdmin />} />
 
         {/* 👨‍🏫 TEACHER */}
         <Route path="/teacher" element={<TeacherLayout />}>
@@ -90,6 +100,7 @@ function AppWrapper() {
           <Route path="marks" element={<Marks />} />
           <Route path="notes" element={<Notes />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="salary" element={<TeacherSalaryView />} /> {/* 🆕 */}
         </Route>
 
         {/* 🎓 STUDENT */}
@@ -99,6 +110,7 @@ function AppWrapper() {
           <Route path="attendance" element={<StudentAttendance />} />
           <Route path="marks" element={<StudentMarks />} />
           <Route path="notes" element={<StudentNotes />} />
+          <Route path="fees" element={<StudentFeesView />} /> {/* 🆕 */}
         </Route>
       </Routes>
 

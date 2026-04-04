@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const FILE_BASE = "http://127.0.0.1:8000";
+
 function StudentNotes() {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,8 +12,26 @@ function StudentNotes() {
   const [previewNote, setPreviewNote] = useState(null);
   const [downloadStatus, setDownloadStatus] = useState({});
 
+  const getFileUrl = (filePath) => {
+    if (!filePath) return "";
+    if (String(filePath).startsWith("http://") || String(filePath).startsWith("https://")) {
+      return filePath;
+    }
+    return `${FILE_BASE}${filePath.startsWith("/") ? "" : "/"}${filePath}`;
+  };
+
+  // FIX: Safe localStorage parsing
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("student"));
+    const storedRaw = localStorage.getItem("student");
+    let stored = null;
+    
+    try {
+      stored = storedRaw ? JSON.parse(storedRaw) : null;
+    } catch (error) {
+      console.error("Error parsing student data:", error);
+      stored = null;
+    }
+    
     if (stored?.student_id) {
       fetchStudentAndNotes(stored.student_id);
     } else {
@@ -19,6 +39,7 @@ function StudentNotes() {
     }
   }, []);
 
+  // FIX: Safe API calls with error handling
   const fetchStudentAndNotes = async (studentId) => {
     try {
       const studentRes = await axios.get(`http://127.0.0.1:8000/api/students/${studentId}/`);
@@ -27,19 +48,24 @@ function StudentNotes() {
       
       if (student.course) {
         const notesRes = await axios.get(`http://127.0.0.1:8000/api/notes/?course=${student.course}`);
-        setNotes(notesRes.data);
+        // FIX: Ensure notes is array
+        setNotes(Array.isArray(notesRes.data) ? notesRes.data : []);
       } else {
         setNotes([]);
       }
     } catch (err) {
+      console.error("Error fetching data:", err);
       setError("Failed to load notes");
+      setNotes([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // FIX: Safe file type detection
   const getFileType = (filename) => {
-    const ext = filename?.split('.').pop()?.toLowerCase();
+    if (!filename) return { type: 'file', icon: '📁', name: 'FILE', color: '#6b7280', bg: '#f3f4f6' };
+    const ext = filename.split('.').pop()?.toLowerCase();
     if (ext === 'pdf') return { type: 'pdf', icon: '📄', name: 'PDF', color: '#ef4444', bg: '#fee2e2' };
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return { type: 'image', icon: '🖼️', name: 'IMAGE', color: '#10b981', bg: '#ecfdf5' };
     if (ext === 'doc' || ext === 'docx') return { type: 'doc', icon: '📝', name: 'DOC', color: '#3b82f6', bg: '#eff6ff' };
@@ -54,39 +80,53 @@ function StudentNotes() {
     return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
+  // FIX: Safe download with error handling
   const handleDownload = async (note, index) => {
-    setDownloadStatus(prev => ({ ...prev, [index]: 'downloading' }));
+    if (index !== undefined && index !== null && index >= 0) {
+      setDownloadStatus((prev) => ({ ...prev, [index]: "downloading" }));
+    }
     
     try {
-      const fileUrl = `http://127.0.0.1:8000${note.file}`;
+      const fileUrl = getFileUrl(note.file);
+      if (!fileUrl) throw new Error("File URL not available");
+
       const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error("Failed to fetch file");
+      
       const blob = await response.blob();
       
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const fileName = note.title + (note.file?.split('.').pop() ? `.${note.file.split('.').pop()}` : '');
+      // FIX: Safe filename generation
+      const ext = note.file ? note.file.split('.').pop() : '';
+      const fileName = note.title + (ext ? `.${ext}` : '');
       a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
       
-      setDownloadStatus(prev => ({ ...prev, [index]: 'success' }));
-      setTimeout(() => {
-        setDownloadStatus(prev => ({ ...prev, [index]: null }));
-      }, 2000);
+      if (index !== undefined && index !== null && index >= 0) {
+        setDownloadStatus((prev) => ({ ...prev, [index]: "success" }));
+        setTimeout(() => {
+          setDownloadStatus((prev) => ({ ...prev, [index]: null }));
+        }, 2000);
+      }
     } catch (err) {
-      setDownloadStatus(prev => ({ ...prev, [index]: 'error' }));
-      setTimeout(() => {
-        setDownloadStatus(prev => ({ ...prev, [index]: null }));
-      }, 2000);
+      console.error("Download error:", err);
+      if (index !== undefined && index !== null && index >= 0) {
+        setDownloadStatus((prev) => ({ ...prev, [index]: "error" }));
+        setTimeout(() => {
+          setDownloadStatus((prev) => ({ ...prev, [index]: null }));
+        }, 2000);
+      }
     }
   };
 
   const handlePreview = (note) => {
     const fileType = getFileType(note.file);
-    const fileUrl = `http://127.0.0.1:8000${note.file}`;
+    const fileUrl = getFileUrl(note.file);
     
     if (fileType.type === 'image') {
       setPreviewNote({ ...note, fileUrl, type: 'image' });
@@ -609,97 +649,70 @@ const styles = {
   },
   tipContent: {
     flex: 1,
+    h4: { fontSize: "18px", fontWeight: "600", margin: "0 0 8px 0", color: "#065f46" },
+    p: { fontSize: "14px", color: "#047857", margin: "0 0 12px 0", lineHeight: "1.5" },
   },
   tipHint: {
     display: "flex",
     gap: "16px",
     flexWrap: "wrap",
     marginTop: "8px",
+    "& span": {
+      fontSize: "12px",
+      color: "#10b981",
+      background: "white",
+      padding: "6px 14px",
+      borderRadius: "30px",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "6px",
+    },
   },
 };
 
-// Add global styles with proper CSS (not inline)
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  .search-box-wrapper:focus-within .search-box {
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
-  }
-  
-  .note-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
-    border-color: #10b981;
-  }
-  
-  .preview-btn:hover {
-    background: #e2e8f0;
-    transform: scale(1.02);
-  }
-  
-  .download-btn:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(16,185,129,0.3);
-  }
-  
-  .modal-close:hover {
-    background: #e2e8f0;
-    transform: scale(1.05);
-  }
-  
-  .download-modal-btn:hover,
-  .close-modal-btn:hover {
-    transform: scale(1.02);
-  }
-  
-  .clear-btn:hover {
-    background: #f1f5f9;
-  }
-  
-  .tip-hint span {
-    font-size: 12px;
-    color: #10b981;
-    background: white;
-    padding: 6px 14px;
-    border-radius: 30px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  
-  .tip-content h4 {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0 0 8px 0;
-    color: #065f46;
-  }
-  
-  .tip-content p {
-    font-size: 14px;
-    color: #047857;
-    margin: 0 0 12px 0;
-    line-height: 1.5;
-  }
-  
-  @media (max-width: 768px) {
-    .notes-grid {
-      grid-template-columns: 1fr;
+// FIX: Style injection with cleanup
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = `
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
     
-    .note-card {
-      flex-wrap: wrap;
+    .search-box-wrapper:focus-within .search-box {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
     }
     
-    .action-buttons {
-      width: 100%;
-      justify-content: flex-end;
+    .note-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+      border-color: #10b981;
     }
-  }
-`;
-document.head.appendChild(styleSheet);
+    
+    .preview-btn:hover {
+      background: #e2e8f0;
+      transform: scale(1.02);
+    }
+    
+    .download-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+    }
+    
+    @media (max-width: 768px) {
+      .notes-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .note-card {
+        flex-wrap: wrap !important;
+      }
+      .action-buttons {
+        width: 100% !important;
+        justify-content: flex-end !important;
+      }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default StudentNotes;
