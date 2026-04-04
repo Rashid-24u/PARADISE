@@ -12,3 +12,7 @@ admin.site.register(Mark)
 admin.site.register(Note)
 admin.site.register(Notice)
 admin.site.register(Gallery)
+
+# ✅ ADD THIS
+admin.site.register(TeacherSalary)
+admin.site.register(TeacherSalaryPayment)
