@@ -125,7 +125,7 @@ function Navbar() {
   const getAbacusStyle = (item) => {
     if (item.name === "Abacus") {
       return {
-        border: "2px solid #d4af37",
+        border: "2px solid #fbcb2e",
         borderRadius: "25px",
         background: "linear-gradient(135deg, rgba(212,175,55,0.1), rgba(245,158,11,0.05))",
         padding: "6px 16px",
@@ -148,7 +148,7 @@ function Navbar() {
           <img src={logo} alt="logo" style={styles.logo} />
           <div style={styles.titleWrapper}>
             <h3 style={styles.title}>
-              <span className="school-name-shine">Paradise Islamic School</span>
+              <span className="school-name-fixed">Paradise Islamic School</span>
             </h3>
           </div>
         </div>
@@ -336,7 +336,7 @@ function Navbar() {
           }
         }
         
-        .school-name-shine {
+        .school-name-fixed {
           background: linear-gradient(
             90deg,
             #fbbf24,
@@ -408,32 +408,9 @@ function Navbar() {
           transform: rotate(90deg);
         }
 
-        /* Desktop view */
-        @media (min-width: 1025px) {
-          .school-name-shine {
-            font-size: 18px;
-          }
-          .nav-link {
-            font-size: 13px;
-          }
-        }
-
-        /* Tablet view */
-        @media (max-width: 1024px) and (min-width: 769px) {
-          .school-name-shine {
-            font-size: 16px;
-          }
-          .nav-link {
-            font-size: 11px !important;
-            padding: 5px 8px !important;
-          }
-        }
-
-        /* Mobile view */
-        @media (max-width: 768px) {
-          .school-name-shine {
-            font-size: 14px;
-          }
+        /* Desktop, Tablet, and Mobile all have the same fixed font size */
+        .school-name-fixed {
+          font-size: 18px !important;
         }
       `}} />
     </>

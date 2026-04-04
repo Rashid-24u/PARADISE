@@ -6,9 +6,22 @@ function TeacherProfile() {
   const [teacher, setTeacher] = useState(null);
   const [loading, setLoading] = useState(true);
   const [documents, setDocuments] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   const navigate = useNavigate();
 
-  // FIX: Safe localStorage parsing with cleanup
+  // Responsive check
+  useEffect(() => {
+    const checkResponsive = () => {
+      setIsMobile(window.innerWidth <= 768);
+      setIsTablet(window.innerWidth > 768 && window.innerWidth <= 1024);
+    };
+    checkResponsive();
+    window.addEventListener('resize', checkResponsive);
+    return () => window.removeEventListener('resize', checkResponsive);
+  }, []);
+
+  // Safe localStorage parsing with cleanup
   useEffect(() => {
     const raw = localStorage.getItem("teacher");
     let stored = null;
@@ -37,29 +50,101 @@ function TeacherProfile() {
       setLoading(false);
     }
     
-    // FIX: Style injection with cleanup
+    // Style injection with cleanup
     const styleSheet = document.createElement("style");
     styleSheet.textContent = `
       @keyframes spin { to { transform: rotate(360deg); } }
-      button { transition: all 0.2s ease; }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      button { 
+        transition: all 0.2s ease; 
+        cursor: pointer;
+      }
       button:active { transform: translateY(0) !important; }
+      
+      /* Responsive Styles */
       @media (max-width: 768px) {
-        .details-grid { grid-template-columns: 1fr !important; gap: 14px !important; padding: 16px !important; }
-        .action-buttons { flex-direction: column !important; gap: 12px !important; padding: 16px !important; }
-        .dashboard-btn, .logout-btn { width: 100% !important; text-align: center !important; }
-        .profile-photo, .profile-photo-placeholder { width: 75px !important; height: 75px !important; }
-        .cover-image { height: 80px !important; }
-        .photo-section { margin-top: -40px !important; }
-        .school-header { padding: 15px !important; }
-        .school-name { font-size: 18px !important; }
-        .documents-grid { grid-template-columns: 1fr !important; }
+        .profile-container {
+          padding: 15px !important;
+        }
+        .details-grid {
+          grid-template-columns: 1fr !important;
+          gap: 12px !important;
+          padding: 12px !important;
+        }
+        .action-buttons {
+          flex-direction: column !important;
+          gap: 10px !important;
+          padding: 16px !important;
+        }
+        .dashboard-btn, .logout-btn {
+          width: 100% !important;
+          justify-content: center !important;
+        }
+        .profile-photo, .profile-photo-placeholder {
+          width: 80px !important;
+          height: 80px !important;
+        }
+        .cover-image {
+          height: 80px !important;
+        }
+        .photo-section {
+          margin-top: -40px !important;
+        }
+        .school-header {
+          padding: 15px !important;
+        }
+        .school-name {
+          font-size: 18px !important;
+        }
+        .documents-grid {
+          grid-template-columns: 1fr !important;
+        }
+        .section-card {
+          padding: 14px !important;
+        }
+        .info-item {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 6px !important;
+        }
+        .info-icon {
+          min-width: auto !important;
+        }
       }
-      @media (max-width: 480px) {
-        .container { padding: 20px 15px !important; }
-        .badge-container { flex-direction: column !important; align-items: center !important; }
-        .section-card { padding: 14px !important; }
+      
+      @media (min-width: 769px) and (max-width: 1024px) {
+        .details-grid {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 16px !important;
+        }
+        .documents-grid {
+          grid-template-columns: repeat(2, 1fr) !important;
+        }
       }
-      .document-card:hover { transform: translateY(-2px); transition: all 0.2s; }
+      
+      @media (min-width: 1025px) {
+        .details-grid {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 20px !important;
+        }
+        .documents-grid {
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+        }
+      }
+      
+      .document-card:hover {
+        transform: translateY(-2px);
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+      
+      .profile-card {
+        animation: fadeIn 0.5s ease-out;
+      }
     `;
     document.head.appendChild(styleSheet);
     
@@ -124,7 +209,7 @@ function TeacherProfile() {
           <p style={styles.schoolAddress}>Pullur, Tirur - 676102 | Quality Education with Islamic Values</p>
         </div>
 
-        <div style={styles.profileCard}>
+        <div style={styles.profileCard} className="profile-card">
           <div style={styles.coverImage}>
             <div style={styles.coverOverlay}></div>
           </div>
@@ -285,7 +370,7 @@ function TeacherProfile() {
               </div>
             )}
 
-            {/* Documents Section - NEW */}
+            {/* Documents Section */}
             {documents && documents.length > 0 && (
               <div style={styles.sectionCard}>
                 <div style={styles.sectionHeader}>
@@ -355,39 +440,41 @@ const styles = {
   container: {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #f5f7fa 0%, #e8f0ea 100%)",
-    padding: "30px 20px",
+    padding: "clamp(15px, 4vw, 30px) clamp(15px, 4vw, 20px)",
   },
   profileWrapper: { 
-    maxWidth: "1000px", 
+    maxWidth: "1200px", 
     margin: "0 auto" 
   },
   schoolHeader: { 
     textAlign: "center", 
     marginBottom: "25px", 
-    padding: "20px", 
+    padding: "clamp(15px, 3vw, 20px)", 
     background: "linear-gradient(135deg, #085322, #2e5c3a)", 
     borderRadius: "16px", 
-    border: "1px solid #d4af37" 
+    border: "1px solid #d4af37",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
   },
   schoolName: { 
-    fontSize: "clamp(20px, 4vw, 26px)", 
+    fontSize: "clamp(18px, 5vw, 26px)", 
     fontWeight: "bold", 
     color: "#d4af37", 
-    margin: 0 
+    margin: 0,
+    letterSpacing: "1px"
   },
   schoolAddress: { 
     color: "#e0e0e0", 
-    fontSize: "12px", 
+    fontSize: "clamp(10px, 3vw, 12px)", 
     marginTop: "8px" 
   },
   profileCard: { 
     background: "white", 
     borderRadius: "24px", 
     overflow: "hidden", 
-    boxShadow: "0 5px 20px rgba(0,0,0,0.08)" 
+    boxShadow: "0 10px 30px rgba(0,0,0,0.1)" 
   },
   coverImage: { 
-    height: "100px", 
+    height: "clamp(80px, 15vw, 120px)", 
     background: "linear-gradient(135deg, #1a472a, #2e5c3a)", 
     position: "relative" 
   },
@@ -401,7 +488,7 @@ const styles = {
   },
   photoSection: { 
     textAlign: "center", 
-    marginTop: "-50px", 
+    marginTop: "clamp(-40px, -8vw, -50px)", 
     position: "relative", 
     zIndex: 2 
   },
@@ -410,18 +497,18 @@ const styles = {
     padding: "3px", 
     background: "white", 
     borderRadius: "50%", 
-    boxShadow: "0 5px 15px rgba(0,0,0,0.1)" 
+    boxShadow: "0 5px 15px rgba(0,0,0,0.2)" 
   },
   profilePhoto: { 
-    width: "90px", 
-    height: "90px", 
+    width: "clamp(80px, 15vw, 100px)", 
+    height: "clamp(80px, 15vw, 100px)", 
     borderRadius: "50%", 
     objectFit: "cover", 
     border: "3px solid white" 
   },
   profilePhotoPlaceholder: { 
-    width: "90px", 
-    height: "90px", 
+    width: "clamp(80px, 15vw, 100px)", 
+    height: "clamp(80px, 15vw, 100px)", 
     borderRadius: "50%", 
     background: "linear-gradient(135deg, #1a472a, #2e5c3a)", 
     display: "flex", 
@@ -430,18 +517,18 @@ const styles = {
     border: "3px solid white" 
   },
   placeholderIcon: { 
-    fontSize: "40px", 
+    fontSize: "clamp(35px, 7vw, 45px)", 
     color: "white" 
   },
   nameSection: { 
     textAlign: "center", 
-    padding: "15px 20px 10px" 
+    padding: "clamp(12px, 3vw, 20px) 20px 10px" 
   },
   teacherName: { 
-    fontSize: "clamp(22px, 4vw, 28px)", 
+    fontSize: "clamp(22px, 5vw, 32px)", 
     fontWeight: "bold", 
     color: "#1a472a", 
-    margin: "0 0 8px 0" 
+    margin: "0 0 10px 0" 
   },
   badgeContainer: { 
     display: "flex", 
@@ -452,30 +539,30 @@ const styles = {
   badgeSubject: { 
     background: "#e8f0e8", 
     color: "#1a472a", 
-    padding: "5px 14px", 
-    borderRadius: "20px", 
-    fontSize: "12px", 
+    padding: "6px 16px", 
+    borderRadius: "25px", 
+    fontSize: "clamp(11px, 3vw, 13px)", 
     fontWeight: "500" 
   },
   badgeCourse: { 
     background: "linear-gradient(135deg, #1a472a, #2e5c3a)", 
     color: "white", 
-    padding: "5px 14px", 
-    borderRadius: "20px", 
-    fontSize: "12px", 
+    padding: "6px 16px", 
+    borderRadius: "25px", 
+    fontSize: "clamp(11px, 3vw, 13px)", 
     fontWeight: "500" 
   },
   detailsGrid: { 
     display: "grid", 
-    gridTemplateColumns: "repeat(2, 1fr)", 
-    gap: "18px", 
-    padding: "20px 24px" 
+    gap: "clamp(12px, 3vw, 20px)", 
+    padding: "clamp(12px, 4vw, 24px)" 
   },
   sectionCard: { 
     background: "#f8faf8", 
     borderRadius: "16px", 
-    padding: "16px", 
-    border: "1px solid #e0e8e0" 
+    padding: "clamp(14px, 3vw, 20px)", 
+    border: "1px solid #e0e8e0",
+    transition: "all 0.3s ease"
   },
   sectionHeader: { 
     display: "flex", 
@@ -483,13 +570,13 @@ const styles = {
     gap: "10px", 
     marginBottom: "14px", 
     paddingBottom: "10px", 
-    borderBottom: "1px solid #e0e8e0" 
+    borderBottom: "2px solid #d4af37" 
   },
   sectionIcon: { 
-    fontSize: "20px" 
+    fontSize: "clamp(18px, 4vw, 22px)" 
   },
   sectionTitle: { 
-    fontSize: "15px", 
+    fontSize: "clamp(14px, 4vw, 16px)", 
     fontWeight: "600", 
     color: "#1a472a", 
     margin: 0 
@@ -497,17 +584,17 @@ const styles = {
   infoList: { 
     display: "flex", 
     flexDirection: "column", 
-    gap: "10px" 
+    gap: "12px" 
   },
   infoItem: { 
     display: "flex", 
     alignItems: "center", 
-    gap: "10px", 
-    padding: "4px 0" 
+    gap: "12px", 
+    padding: "6px 0" 
   },
   infoIcon: { 
-    fontSize: "16px", 
-    minWidth: "28px", 
+    fontSize: "clamp(16px, 4vw, 18px)", 
+    minWidth: "32px", 
     color: "#1a472a" 
   },
   infoContent: { 
@@ -517,111 +604,109 @@ const styles = {
     gap: "2px" 
   },
   infoLabel: { 
-    fontSize: "10px", 
+    fontSize: "clamp(9px, 3vw, 11px)", 
     color: "#8b9a8b", 
     textTransform: "uppercase", 
     letterSpacing: "0.5px" 
   },
   infoValue: { 
-    fontSize: "13px", 
+    fontSize: "clamp(12px, 4vw, 14px)", 
     color: "#2c3e50", 
     fontWeight: "500" 
   },
   addressContent: { 
     display: "flex", 
     alignItems: "flex-start", 
-    gap: "10px", 
-    padding: "4px 0" 
+    gap: "12px", 
+    padding: "6px 0" 
   },
   addressIcon: { 
-    fontSize: "16px", 
-    minWidth: "28px", 
+    fontSize: "clamp(16px, 4vw, 18px)", 
+    minWidth: "32px", 
     color: "#1a472a" 
   },
   addressText: { 
     flex: 1, 
-    fontSize: "13px", 
+    fontSize: "clamp(12px, 4vw, 14px)", 
     color: "#4a5568", 
     lineHeight: "1.5", 
     margin: 0 
   },
   detailsContent: { 
-    padding: "4px 0" 
+    padding: "6px 0" 
   },
   detailsText: { 
-    fontSize: "13px", 
+    fontSize: "clamp(12px, 4vw, 14px)", 
     color: "#4a5568", 
     lineHeight: "1.6", 
     margin: 0 
   },
-  // New styles for documents
   documentsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
     gap: "12px",
   },
   documentCard: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "12px",
+    padding: "clamp(10px, 3vw, 14px)",
     background: "white",
     borderRadius: "12px",
     border: "1px solid #e0e8e0",
     transition: "all 0.2s",
-    cursor: "pointer",
   },
   documentIcon: {
-    fontSize: "28px",
+    fontSize: "clamp(24px, 6vw, 32px)",
   },
   documentInfo: {
     flex: 1,
   },
   documentTitle: {
-    fontSize: "13px",
+    fontSize: "clamp(12px, 4vw, 14px)",
     fontWeight: "600",
     color: "#1e293b",
     marginBottom: "4px",
   },
   documentType: {
-    fontSize: "10px",
+    fontSize: "clamp(9px, 3vw, 11px)",
     color: "#64748b",
     textTransform: "capitalize",
     marginBottom: "2px",
   },
   documentDate: {
-    fontSize: "9px",
+    fontSize: "clamp(8px, 2.5vw, 10px)",
     color: "#94a3b8",
   },
   documentViewBtn: {
-    padding: "6px 12px",
+    padding: "clamp(5px, 2vw, 8px) clamp(10px, 3vw, 14px)",
     background: "#3b82f6",
     color: "white",
     textDecoration: "none",
     borderRadius: "8px",
-    fontSize: "11px",
+    fontSize: "clamp(10px, 3vw, 12px)",
     fontWeight: "500",
     whiteSpace: "nowrap",
+    transition: "all 0.2s",
   },
   actionButtons: { 
     display: "flex", 
-    gap: "15px", 
+    gap: "clamp(12px, 4vw, 20px)", 
     justifyContent: "center", 
-    padding: "16px 24px 24px", 
+    padding: "clamp(16px, 4vw, 24px)", 
     borderTop: "1px solid #e0e8e0" 
   },
   dashboardBtn: { 
     background: "linear-gradient(135deg, #1a472a, #2e5c3a)", 
     color: "white", 
     border: "none", 
-    padding: "10px 28px", 
+    padding: "clamp(10px, 3vw, 12px) clamp(20px, 5vw, 32px)", 
     borderRadius: "30px", 
-    fontSize: "13px", 
+    fontSize: "clamp(12px, 4vw, 14px)", 
     fontWeight: "600", 
     cursor: "pointer", 
     transition: "all 0.2s",
     "&:hover": { 
-      transform: "translateY(-1px)", 
+      transform: "translateY(-2px)", 
       boxShadow: "0 4px 12px rgba(26,71,42,0.3)" 
     } 
   },
@@ -629,23 +714,23 @@ const styles = {
     background: "white", 
     color: "#1a472a", 
     border: "2px solid #1a472a", 
-    padding: "10px 28px", 
+    padding: "clamp(10px, 3vw, 12px) clamp(20px, 5vw, 32px)", 
     borderRadius: "30px", 
-    fontSize: "13px", 
+    fontSize: "clamp(12px, 4vw, 14px)", 
     fontWeight: "600", 
     cursor: "pointer", 
     transition: "all 0.2s",
     "&:hover": { 
-      transform: "translateY(-1px)", 
+      transform: "translateY(-2px)", 
       background: "#f0f5f0" 
     } 
   },
   footer: { 
     textAlign: "center", 
-    padding: "14px", 
+    padding: "clamp(12px, 3vw, 16px)", 
     background: "#f8faf8", 
     borderTop: "1px solid #e0e8e0", 
-    fontSize: "11px", 
+    fontSize: "clamp(10px, 3vw, 12px)", 
     color: "#8b9a8b" 
   },
   loadingContainer: { 
@@ -672,34 +757,40 @@ const styles = {
   errorCard: { 
     background: "white", 
     borderRadius: "20px", 
-    padding: "40px", 
+    padding: "clamp(30px, 8vw, 50px)", 
     textAlign: "center", 
-    maxWidth: "400px", 
+    maxWidth: "90%", 
+    width: "400px", 
     margin: "0 auto" 
   },
   errorIcon: { 
-    fontSize: "50px", 
+    fontSize: "clamp(40px, 10vw, 60px)", 
     marginBottom: "15px" 
   },
   errorTitle: { 
-    fontSize: "22px", 
+    fontSize: "clamp(20px, 5vw, 24px)", 
     color: "#333", 
     marginBottom: "8px" 
   },
   errorMessage: { 
     color: "#666", 
     marginBottom: "20px", 
-    fontSize: "14px" 
+    fontSize: "clamp(12px, 4vw, 14px)" 
   },
   loginBtn: { 
-    background: "linear-gradient(135deg, #348283, #0e8995)", 
+    background: "linear-gradient(135deg, #1a472a, #2e5c3a)", 
     color: "white", 
     border: "none", 
-    padding: "10px 28px", 
+    padding: "clamp(10px, 3vw, 12px) clamp(25px, 6vw, 35px)", 
     borderRadius: "30px", 
-    fontSize: "13px", 
+    fontSize: "clamp(12px, 4vw, 14px)", 
     fontWeight: "600", 
-    cursor: "pointer" 
+    cursor: "pointer",
+    transition: "all 0.2s",
+    "&:hover": {
+      transform: "translateY(-2px)",
+      boxShadow: "0 4px 12px rgba(26,71,42,0.3)"
+    }
   },
 };
 

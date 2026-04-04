@@ -117,6 +117,8 @@ function AppWrapper() {
       {/* Keep footer for public/login only */}
       {!(location.pathname.startsWith("/admin") || location.pathname.startsWith("/teacher") || location.pathname.startsWith("/student")) && <Footer />}
 
+      <Footer />
+
       <ScrollToTopBtn />
     </>
   );
